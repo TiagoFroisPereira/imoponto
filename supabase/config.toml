@@ -1,0 +1,30 @@
+project_id = "wihgrfiuosvpjinkyluu"
+
+[functions.create-checkout]
+verify_jwt = true
+
+[functions.stripe-webhook]
+verify_jwt = false
+
+[functions.get-mapbox-token]
+verify_jwt = true
+
+[functions.email-worker]
+verify_jwt = true
+
+# Auth Email Templates
+[auth.email.template.confirmation]
+subject = "Confirme o seu registo na ImoPonto"
+content_path = "./supabase/templates/auth/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Recuperar Palavra-passe - ImoPonto"
+content_path = "./supabase/templates/auth/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirmar Alteração de Email - ImoPonto"
+content_path = "./supabase/templates/auth/email_change.html"
+
+[auth.email.template.invite]
+subject = "Foi convidado para a ImoPonto"
+content_path = "./supabase/templates/auth/invite.html"

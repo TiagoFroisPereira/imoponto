@@ -1,0 +1,20 @@
+-- Note: This script assumes you have the 'supabase_functions' schema and extensions enabled.
+-- Most Supabase projects have this enabled by default for Webhooks.
+
+-- First, ensure the function to call our edge function exists
+-- This is a representative script of what happens when you create a webhook in the UI.
+
+CREATE OR REPLACE TRIGGER "on_email_queue_insert"
+AFTER INSERT ON "public"."email_queue"
+FOR EACH ROW
+EXECUTE FUNCTION "supabase_functions"."http_request"(
+  'http://localhost:54321/functions/v1/email-worker', -- This URL is for local development. In production, Supabase manages the change.
+  'POST',
+  '{"Content-Type":"application/json", "Authorization":"Bearer YOUR_ANON_KEY"}', -- Replace YOUR_ANON_KEY if needed
+  '{}',
+  '5000'
+);
+
+-- IMPORTANT: It is highly recommended to create the Webhook via the Supabase Dashboard UI 
+-- (Database -> Webhooks) as it automatically handles the environment-specific URLs 
+-- and authentication keys between the Database and Edge Functions.

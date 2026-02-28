@@ -1,0 +1,169 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ImoPonto</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            min-width: 100%;
+            width: 100% !important;
+            background-color: #f8fafc;
+            font-family: 'Outfit', Arial, sans-serif;
+        }
+
+        table {
+            border-spacing: 0;
+            font-family: 'Outfit', Arial, sans-serif;
+            color: #334155;
+        }
+
+        td {
+            padding: 0;
+        }
+
+        img {
+            border: 0;
+        }
+
+        .main {
+            background-color: #ffffff;
+            margin: 40px auto;
+            width: 100%;
+            max-width: 600px;
+            border-spacing: 0;
+            border-radius: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .button {
+            background: #f16432;
+            background: linear-gradient(135deg, #f16432 0%, #ea580c 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 16px 32px;
+            border-radius: 12px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .info-card {
+            background-color: #f1f5f9;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+        }
+
+        .divider {
+            border-top: 1px solid #e2e8f0;
+            margin: 30px 0;
+        }
+
+        h1 {
+            color: #0f172a;
+            margin: 0 0 20px 0;
+            font-weight: 700;
+            font-size: 28px;
+        }
+
+        p {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #475569;
+        }
+
+        .footer-text {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        @media screen and (max-width: 600px) {
+            .main {
+                width: 100% !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+            }
+
+            .content {
+                padding: 30px 20px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div style="background-color: #f8fafc; padding: 20px 0;">
+        <table class="main" align="center" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td
+                    style="padding: 40px 0; text-align: center; background-color: #ffffff; border-radius: 24px 24px 0 0;">
+                    <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
+                        <tr>
+                            <td>
+                                <img src="{{ .SiteURL }}/logo.png" width="180" height="auto"
+                                    style="display: block; margin: 0 auto;" alt="ImoPonto Logo" />
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td height="1" style="background-color: #f1f5f9; font-size: 1px; line-height: 1px;">&nbsp;</td>
+            </tr>
+            <tr>
+                <td class="content" style="padding: 50px 45px;">
+                    <h1>Convite para se juntar</h1>
+                    <p>Olá,</p>
+                    <p>Foi convidado para se juntar à plataforma <strong>ImoPonto</strong> — o mercado imobiliário onde
+                        compra e vende sem pagar comissões.</p>
+                    <p>Para aceitar o convite e criar a sua conta, clique no botão abaixo:</p>
+
+                    <div style="text-align: center; margin: 35px 0;">
+                        <a href="{{ .ConfirmationURL }}" class="button">Aceitar Convite</a>
+                    </div>
+
+                    <div class="info-card">
+                        <p style="margin: 0; font-size: 14px; color: #64748b;">
+                            <strong>Bem-vindo:</strong> Junte-se a milhares de proprietários que estão a retomar o
+                            controlo do seu património imobiliário.
+                        </p>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <p style="font-weight: 600; color: #1e293b;">
+                        Esperamos por si,<br>
+                        A Equipa ImoPonto
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 0 45px 40px 45px; text-align: center;">
+                    <table width="100%" border="0" cellpadding="0" cellspacing="0"
+                        style="border-top: 1px solid #f1f5f9; padding-top: 30px;">
+                        <tr>
+                            <td class="footer-text">
+                                <p style="margin-bottom: 5px; font-weight: 600;">ImoPonto &copy; 2026</p>
+                                <p style="margin-bottom: 20px;">Habitação de qualidade, sem comissões.</p>
+                                <a href="{{ .SiteURL }}"
+                                    style="color: #f16432; text-decoration: none; font-weight: 600;">Visitar o site</a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+
+</html>
