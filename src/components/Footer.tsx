@@ -78,10 +78,11 @@ const Footer = () => {
           {/* Social Links */}
           <div className="flex items-center gap-4">
             {[
-              { icon: Facebook, href: "#", name: "facebook" },
+              { icon: Facebook, href: "https://www.facebook.com/share/1JoSvYHdDF/", name: "facebook" },
               { icon: Instagram, href: "https://www.instagram.com/imoveis.semfiltros/", name: "instagram" },
-              { icon: Linkedin, href: "#", name: "linkedin" },
-              { icon: Twitter, href: "#", name: "twitter" }].
+              // { icon: Linkedin, href: "#", name: "linkedin" },
+              // { icon: Twitter, href: "#", name: "twitter" }
+            ].
               map(({ icon: Icon, href, name }) =>
                 <a
                   key={name}
