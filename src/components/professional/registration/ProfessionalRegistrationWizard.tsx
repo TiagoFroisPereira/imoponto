@@ -10,6 +10,7 @@ import { ChevronLeft, ChevronRight, CheckCircle, Loader2 } from "lucide-react";
 import { ProfessionalCategoryStep, requiresInsurance, getCategoryMapping } from "./ProfessionalCategoryStep";
 import { ProfessionalDeclarationsStep } from "./ProfessionalDeclarationsStep";
 import { ProfessionalTermsStep } from "./ProfessionalTermsStep";
+import { CreditIntermediaryDeclarationsStep, areAllCreditDeclarationsAccepted } from "./CreditIntermediaryDeclarationsStep";
 import type { ServiceCategory } from "@/hooks/useProfessionals";
 
 const TERMS_VERSION = "1.0";
@@ -34,17 +35,51 @@ export function ProfessionalRegistrationWizard({ onSuccess }: ProfessionalRegist
   const [autonomy1Accepted, setAutonomy1Accepted] = useState(false);
   const [autonomy2Accepted, setAutonomy2Accepted] = useState(false);
   
+  // Step 2b (conditional): Credit Intermediary Declarations
+  const [creditDeclarations, setCreditDeclarations] = useState<Record<string, boolean>>({});
+  
   // Step 3: Terms
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const needsInsurance = requiresInsurance(selectedCategory);
+  const isCreditIntermediary = selectedCategory === "intermediario_credito";
   
-  const canProceedStep1 = selectedCategory !== "";
-  const canProceedStep2 = autonomy1Accepted && autonomy2Accepted && (!needsInsurance || insuranceAccepted);
-  const canProceedStep3 = termsAccepted;
+  // Build dynamic steps list
+  const getSteps = () => {
+    const steps = [
+      { key: "category", title: "Categoria Profissional" },
+      { key: "declarations", title: "Declarações Obrigatórias" },
+    ];
+    if (isCreditIntermediary) {
+      steps.push({ key: "credit", title: "Declarações — Intermediário de Crédito" });
+    }
+    steps.push({ key: "terms", title: "Termos e Condições" });
+    return steps;
+  };
 
-  const totalSteps = 3;
+  const steps = getSteps();
+  const totalSteps = steps.length;
+  const currentStepKey = steps[step - 1]?.key;
   const progress = (step / totalSteps) * 100;
+
+  const handleCreditDeclarationChange = (id: string, checked: boolean) => {
+    setCreditDeclarations(prev => ({ ...prev, [id]: checked }));
+  };
+
+  const canProceed = () => {
+    switch (currentStepKey) {
+      case "category":
+        return selectedCategory !== "";
+      case "declarations":
+        return autonomy1Accepted && autonomy2Accepted && (!needsInsurance || insuranceAccepted);
+      case "credit":
+        return areAllCreditDeclarationsAccepted(creditDeclarations);
+      case "terms":
+        return termsAccepted;
+      default:
+        return false;
+    }
+  };
 
   const handleNext = () => {
     if (step < totalSteps) {
@@ -55,6 +90,22 @@ export function ProfessionalRegistrationWizard({ onSuccess }: ProfessionalRegist
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
+    }
+  };
+
+  // Reset credit declarations when category changes away from intermediario_credito
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    if (value !== "intermediario_credito") {
+      setCreditDeclarations({});
+    }
+    // Reset step to 1 if changing category while on later steps
+    if (step > 1) {
+      setStep(1);
+      setInsuranceAccepted(false);
+      setAutonomy1Accepted(false);
+      setAutonomy2Accepted(false);
+      setTermsAccepted(false);
     }
   };
 
@@ -97,24 +148,35 @@ export function ProfessionalRegistrationWizard({ onSuccess }: ProfessionalRegist
       }
 
       // Log legal acceptance (internal audit log)
-      const { error: logError } = await supabase
-        .from("professional_legal_acceptances")
-        .insert({
-          user_id: user.id,
-          professional_id: professional.id,
-          category_selected: selectedCategory,
-          insurance_declaration_accepted: needsInsurance ? insuranceAccepted : false,
-          autonomy_declaration_1_accepted: autonomy1Accepted,
-          autonomy_declaration_2_accepted: autonomy2Accepted,
-          terms_accepted: termsAccepted,
-          terms_version: TERMS_VERSION,
-          user_agent: navigator.userAgent,
-          accepted_at: new Date().toISOString(),
-        });
+      const legalData: Record<string, any> = {
+        user_id: user.id,
+        professional_id: professional.id,
+        category_selected: selectedCategory,
+        insurance_declaration_accepted: needsInsurance ? insuranceAccepted : false,
+        autonomy_declaration_1_accepted: autonomy1Accepted,
+        autonomy_declaration_2_accepted: autonomy2Accepted,
+        terms_accepted: termsAccepted,
+        terms_version: TERMS_VERSION,
+        user_agent: navigator.userAgent,
+        accepted_at: new Date().toISOString(),
+      };
+
+      // Add credit intermediary specific declarations
+      if (isCreditIntermediary) {
+        legalData.credit_reg_banco_portugal = creditDeclarations.credit_reg_banco_portugal || false;
+        legalData.credit_reg_active = creditDeclarations.credit_reg_active || false;
+        legalData.credit_scope_authorized = creditDeclarations.credit_scope_authorized || false;
+        legalData.credit_insurance_rc = creditDeclarations.credit_insurance_rc || false;
+        legalData.credit_autonomy = creditDeclarations.credit_autonomy || false;
+        legalData.credit_dl_compliance = creditDeclarations.credit_dl_compliance || false;
+      }
+
+      const { error: logError } = await (supabase
+        .from("professional_legal_acceptances") as any)
+        .insert(legalData);
 
       if (logError) {
         console.error("Error logging legal acceptance:", logError);
-        // Don't fail the registration if logging fails, but log it
       }
 
       toast({
@@ -136,15 +198,15 @@ export function ProfessionalRegistrationWizard({ onSuccess }: ProfessionalRegist
   };
 
   const renderStep = () => {
-    switch (step) {
-      case 1:
+    switch (currentStepKey) {
+      case "category":
         return (
           <ProfessionalCategoryStep
             value={selectedCategory}
-            onChange={setSelectedCategory}
+            onChange={handleCategoryChange}
           />
         );
-      case 2:
+      case "declarations":
         return (
           <ProfessionalDeclarationsStep
             selectedCategory={selectedCategory}
@@ -157,7 +219,14 @@ export function ProfessionalRegistrationWizard({ onSuccess }: ProfessionalRegist
             onAutonomy2Change={setAutonomy2Accepted}
           />
         );
-      case 3:
+      case "credit":
+        return (
+          <CreditIntermediaryDeclarationsStep
+            acceptedDeclarations={creditDeclarations}
+            onDeclarationChange={handleCreditDeclarationChange}
+          />
+        );
+      case "terms":
         return (
           <ProfessionalTermsStep
             termsAccepted={termsAccepted}
@@ -169,25 +238,6 @@ export function ProfessionalRegistrationWizard({ onSuccess }: ProfessionalRegist
     }
   };
 
-  const canProceed = () => {
-    switch (step) {
-      case 1:
-        return canProceedStep1;
-      case 2:
-        return canProceedStep2;
-      case 3:
-        return canProceedStep3;
-      default:
-        return false;
-    }
-  };
-
-  const stepTitles = [
-    "Categoria Profissional",
-    "Declarações Obrigatórias",
-    "Termos e Condições",
-  ];
-
   return (
     <Card className="border-border/50 shadow-elegant">
       <CardHeader>
@@ -197,7 +247,7 @@ export function ProfessionalRegistrationWizard({ onSuccess }: ProfessionalRegist
             Passo {step} de {totalSteps}
           </span>
         </div>
-        <CardDescription>{stepTitles[step - 1]}</CardDescription>
+        <CardDescription>{steps[step - 1]?.title}</CardDescription>
         <Progress value={progress} className="h-2 mt-4" />
       </CardHeader>
       <CardContent className="space-y-6">

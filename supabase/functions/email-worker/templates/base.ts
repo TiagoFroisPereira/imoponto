@@ -106,14 +106,10 @@ export const baseLayout = (content: string) => `
     <table class="main" align="center" border="0" cellpadding="0" cellspacing="0">
       <!-- Logo/Header Area -->
       <tr>
-        <td style="padding: 40px 0 0 0; text-align: center;">
-          <table border="0" cellpadding="0" cellspacing="0" align="center" style="margin: 0 auto;">
-            <tr>
-              <td style="text-align: center; vertical-align: middle;">
-                <img src="https://imoponto.pt/logo.png" width="160" style="display: block; margin: 0 auto; border-radius: 14px; max-width: 200px;" alt="ImoPonto" />
-              </td>
-            </tr>
-          </table>
+        <td style="padding: 10px 0 0 0; text-align: center;">
+          <div style="height: 100px; overflow: hidden; width: 240px; margin: 0 auto; display: block;">
+            <img src="cid:logo" width="240" style="display: block; margin: -40px auto 0 auto; border-radius: 0; max-width: 240px;" alt="ImoPonto" />
+          </div>
         </td>
       </tr>
       
@@ -151,7 +147,7 @@ export const baseLayout = (content: string) => `
                     </td>
                     <td style="color: #e2e8f0;">|</td>
                     <td style="padding: 0 10px;">
-                      <a href="https://imoponto.pt/ajuda" style="color: #64748b; text-decoration: none;">Ajuda</a>
+                      <a href="https://imoponto.pt/contactos" style="color: #64748b; text-decoration: none;">Ajuda</a>
                     </td>
                   </tr>
                 </table>

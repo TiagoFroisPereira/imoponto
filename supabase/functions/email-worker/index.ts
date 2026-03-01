@@ -48,7 +48,7 @@ serve(async (req) => {
         const port = parseInt(Deno.env.get("SMTP_PORT") || "587");
         const user = Deno.env.get("SMTP_USERNAME");
         const pass = Deno.env.get("SMTP_PASSWORD");
-        const fromName = Deno.env.get("SMTP_FROM_NAME") || "Casa Direta";
+        const fromName = Deno.env.get("SMTP_FROM_NAME") || "ImoPonto";
         const fromEmail = Deno.env.get("SMTP_FROM_EMAIL");
 
         if (!host || !user || !pass || !fromEmail) {
@@ -71,6 +71,13 @@ serve(async (req) => {
             to: recipient_email,
             subject: subject,
             html: html,
+            attachments: [
+                {
+                    filename: "logo.png",
+                    path: "https://imoponto.lovable.app/logo.png",
+                    cid: "logo",
+                },
+            ],
         });
 
         console.log("Email sent successfully!");

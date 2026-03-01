@@ -69,28 +69,34 @@ export function ProfessionalAgendaSection({ professionalId, professionalCategory
   const datesWithEvents = events.map((event) => parseISO(event.event_date));
 
   const handleConfirmation = async (eventId: string, status: ConfirmationStatus) => {
-    const success = await updateConfirmation(eventId, status);
-    if (success) {
+    try {
+      await updateConfirmation(eventId, status);
       toast({
         title: status === "confirmed" ? "Presença confirmada ✅" : "Presença recusada",
         description: status === "confirmed"
           ? "O organizador será notificado."
           : "O organizador será notificado da sua recusa.",
       });
+    } catch (e) {
+      console.error("Error updating confirmation:", e);
     }
   };
 
   const handleDelete = async (eventId: string) => {
-    const success = await deleteEvent(eventId);
-    if (success) {
+    try {
+      await deleteEvent(eventId);
       toast({ title: "Evento eliminado" });
+    } catch (e) {
+      console.error("Error deleting event:", e);
     }
   };
 
   const handleStatusChange = async (eventId: string, status: "completed" | "cancelled") => {
-    const success = await updateEventStatus(eventId, status);
-    if (success) {
+    try {
+      await updateEventStatus(eventId, status);
       toast({ title: status === "completed" ? "Evento concluído ✅" : "Evento cancelado" });
+    } catch (e) {
+      console.error("Error updating event status:", e);
     }
   };
 

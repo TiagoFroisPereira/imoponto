@@ -34,7 +34,9 @@ import {
   MessageSquare,
   Eye,
   CreditCard,
-  ArrowLeft
+  ArrowLeft,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 
 type SettingsSection = "profile" | "account" | "notifications" | "payments";
@@ -65,6 +67,8 @@ export default function Settings() {
   // Account Form States
   const [newEmail, setNewEmail] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [confirmDeleteEmail, setConfirmDeleteEmail] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -198,10 +202,44 @@ export default function Settings() {
   };
 
   const handleDeleteAccount = async () => {
-    toast({
-      title: "Funcionalidade em desenvolvimento",
-      description: "A eliminação de conta estará disponível em breve. Contacte o suporte para assistência.",
-    });
+    if (confirmDeleteEmail !== user?.email) {
+      toast({
+        title: "Email incorreto",
+        description: "O email introduzido não corresponde à sua conta.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Sem sessão");
+
+      const response = await supabase.functions.invoke("delete-account", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+
+      if (response.error) throw response.error;
+
+      // Local sign out to clear session on this device
+      await supabase.auth.signOut({ scope: "local" });
+
+      toast({
+        title: "Conta eliminada",
+        description: "A sua conta e todos os dados foram permanentemente eliminados.",
+      });
+      navigate("/");
+    } catch (error) {
+      console.error("[Settings] Error deleting account:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível eliminar a conta. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const menuItems = [
@@ -534,17 +572,51 @@ export default function Settings() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Tem a certeza?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta ação não pode ser revertida. Todos os seus dados serão permanentemente eliminados.
+                            <AlertDialogTitle className="flex items-center gap-2">
+                              <AlertTriangle className="w-5 h-5 text-destructive" />
+                              Eliminar conta permanentemente?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription asChild>
+                              <div className="space-y-4">
+                                <p>
+                                  Esta ação é <span className="font-semibold text-destructive">irreversível</span>. Após a eliminação, não será possível recuperar a sua conta nem os dados associados.
+                                </p>
+                                <ul className="list-disc list-inside space-y-1 text-sm">
+                                  <li>Perfil e dados pessoais</li>
+                                  <li>Imóveis publicados</li>
+                                  <li>Mensagens e conversas</li>
+                                  <li>Documentos no cofre digital</li>
+                                  <li>Favoritos e histórico</li>
+                                  <li>Perfil profissional (se aplicável)</li>
+                                </ul>
+                                <div className="pt-2">
+                                  <Label htmlFor="confirm-delete-email">
+                                    Escreva o seu email para confirmar: <span className="font-medium text-foreground">{user?.email}</span>
+                                  </Label>
+                                  <Input
+                                    id="confirm-delete-email"
+                                    type="email"
+                                    placeholder="Introduza o seu email"
+                                    value={confirmDeleteEmail}
+                                    onChange={(e) => setConfirmDeleteEmail(e.target.value)}
+                                    className="mt-2"
+                                  />
+                                </div>
+                              </div>
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogCancel onClick={() => setConfirmDeleteEmail("")}>Cancelar</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={handleDeleteAccount}
+                              disabled={isDeleting || confirmDeleteEmail !== user?.email}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             >
+                              {isDeleting ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4 mr-2" />
+                              )}
                               Eliminar conta
                             </AlertDialogAction>
                           </AlertDialogFooter>

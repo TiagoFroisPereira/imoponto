@@ -16,7 +16,7 @@ export const visitRequestTemplate = (data: any) => `
   <div class="divider"></div>
   
   <p style="text-align: center;">
-    <a href="https://imoponto.pt/dashboard/visitas" class="button">Responder ao Pedido</a>
+    <a href="https://imoponto.pt/agenda" class="button">Responder ao Pedido</a>
   </p>
   
   <p style="margin-top: 30px; font-weight: 600; color: #1e293b;">

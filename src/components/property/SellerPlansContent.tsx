@@ -274,6 +274,39 @@ export function SellerPlansContent({ onPlanSelected, showHero = true, showProfes
                             </div>
                         </div>
 
+                        {selectedPlan && selectedPlan !== "Plano Free" && (
+                            <div className="space-y-3">
+                                <p className="text-sm font-semibold text-foreground">Período de faturação</p>
+                                <RadioGroup
+                                    value={billingPeriod}
+                                    onValueChange={(v) => setBillingPeriod(v as 'monthly' | 'yearly')}
+                                    className="grid grid-cols-2 gap-3"
+                                >
+                                    <Label
+                                        htmlFor="billing-monthly"
+                                        className={`flex flex-col items-center gap-1 p-4 rounded-xl border-2 cursor-pointer transition-all ${billingPeriod === 'monthly' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}
+                                    >
+                                        <RadioGroupItem value="monthly" id="billing-monthly" className="sr-only" />
+                                        <span className="text-lg font-bold text-foreground">
+                                            {selectedPlan === "Plano Start" ? "9,90€" : "19,90€"}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">por mês</span>
+                                    </Label>
+                                    <Label
+                                        htmlFor="billing-yearly"
+                                        className={`flex flex-col items-center gap-1 p-4 rounded-xl border-2 cursor-pointer transition-all relative ${billingPeriod === 'yearly' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}
+                                    >
+                                        <RadioGroupItem value="yearly" id="billing-yearly" className="sr-only" />
+                                        <span className="absolute -top-2.5 right-2 text-[10px] font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded-full">Poupe 17%</span>
+                                        <span className="text-lg font-bold text-foreground">
+                                            {selectedPlan === "Plano Start" ? "99€" : "199€"}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">por ano</span>
+                                    </Label>
+                                </RadioGroup>
+                            </div>
+                        )}
+
                         <div className="flex items-start space-x-3 p-4 bg-primary/5 rounded-xl border border-primary/10">
                             <Checkbox
                                 id="legal-agree-modal"

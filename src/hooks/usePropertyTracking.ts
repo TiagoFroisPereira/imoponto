@@ -4,9 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 export function usePropertyTracking() {
   const trackViewMutation = useMutation({
     mutationFn: async (propertyId: string) => {
-      const { data, error } = await ((supabase as any).rpc('track_property_view', {
+      const { data, error } = await (supabase.rpc('track_property_view', {
         property_uuid: propertyId
-      }));
+      }) as any);
       if (error) throw error;
       return data;
     },
@@ -20,9 +20,9 @@ export function usePropertyTracking() {
 
   const trackShareMutation = useMutation({
     mutationFn: async (propertyId: string) => {
-      const { data, error } = await ((supabase as any).rpc('track_property_share', {
+      const { data, error } = await (supabase.rpc('track_property_share', {
         property_uuid: propertyId
-      }));
+      }) as any);
       if (error) throw error;
       return data;
     },

@@ -17,7 +17,7 @@ export const propertyPublishedTemplate = (data: any) => `
   <p style="text-align: center;">
     <a href="https://imoponto.pt/imovel/${data.propertyId}" class="button">Ver Anúncio Público</a>
     <br><br>
-    <a href="https://imoponto.pt/dashboard/meus-imoveis" style="color: #64748b; text-decoration: none; font-size: 14px;">Gerir no Dashboard</a>
+    <a href="https://imoponto.pt/meus-imoveis" style="color: #64748b; text-decoration: none; font-size: 14px;">Gerir no Dashboard</a>
   </p>
   
   <p style="margin-top: 30px; font-weight: 600; color: #1e293b;">

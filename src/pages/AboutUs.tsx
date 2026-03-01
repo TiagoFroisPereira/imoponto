@@ -124,7 +124,7 @@ const AboutUs = () => {
                     {
                       icon: MapPin,
                       title: "Plataforma neutra",
-                      description: "Sem remuneração variável e sem interesse na conclusão do negócio"
+                      description: "Sem remuneração variável e sem interesse no valor gerado pelo seu negócio"
                     }
                   ].map((item) => (
                     <div key={item.title} className="flex gap-4 bg-muted/30 rounded-xl p-4">

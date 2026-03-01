@@ -7,6 +7,8 @@ import { propertyPublishedTemplate } from "./property_published.ts";
 import { paymentReceiptTemplate } from "./payment_receipt.ts";
 import { visitRequestTemplate } from "./visit_request.ts";
 import { professionalReplyTemplate } from "./professional_reply.ts";
+import { waitlistSignupTemplate } from "./waitlist_signup.ts";
+import { waitlistConfirmationTemplate } from "./waitlist_confirmation.ts";
 
 export interface RenderResult {
     subject: string;
@@ -56,6 +58,16 @@ export function renderEmail(templateKey: string, data: any): RenderResult {
         case "professional_reply":
             subject = "Resposta de Profissional Recebida - ImoPonto";
             content = professionalReplyTemplate(data);
+            break;
+
+        case "waitlist_signup":
+            subject = "Nova inscrição na Lista de Espera - ImoPonto";
+            content = waitlistSignupTemplate(data);
+            break;
+
+        case "waitlist_confirmation":
+            subject = "Está na lista de espera da ImoPonto!";
+            content = waitlistConfirmationTemplate(data);
             break;
 
         default:

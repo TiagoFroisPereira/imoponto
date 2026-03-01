@@ -10,7 +10,7 @@ export const welcomeTemplate = (data: any) => `
       <li>Publicar o teu imóvel gratuitamente</li>
       <li>Explorar oportunidades sem comissões</li>
       <li>Contactar profissionais especializados</li>
-      <li>Gerir toda a documentação no teu Vault</li>
+      <li>Gerir toda a documentação no teu Cofre</li>
     </ul>
   </div>
   

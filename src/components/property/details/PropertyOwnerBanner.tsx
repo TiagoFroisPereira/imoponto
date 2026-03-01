@@ -9,7 +9,7 @@ interface PropertyOwnerBannerProps {
 
 export function PropertyOwnerBanner({ wizardStep, onManageProcess }: PropertyOwnerBannerProps) {
   return (
-    <div className="mb-8 bg-card border border-primary/20 rounded-xl p-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
+    <div className="mb-8 bg-card border border-primary/20 rounded-xl p-4 flex flex-col gap-4 shadow-sm">
       <div className="flex items-center gap-4">
         <div className="p-3 bg-primary/10 rounded-full">
           <Logs className="w-6 h-6 text-primary" />
@@ -22,7 +22,7 @@ export function PropertyOwnerBanner({ wizardStep, onManageProcess }: PropertyOwn
           </div>
         </div>
       </div>
-      <Button onClick={onManageProcess} className="w-full sm:w-auto">Gerir Processo</Button>
+      <Button onClick={onManageProcess} className="w-full">Gerir Processo</Button>
     </div>
   );
 }

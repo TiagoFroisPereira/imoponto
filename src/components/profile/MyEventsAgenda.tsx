@@ -57,11 +57,13 @@ export function MyEventsAgenda({ userId }: MyEventsAgendaProps) {
   const datesWithEvents = events.map((event) => parseISO(event.event_date));
 
   const handleConfirmation = async (eventId: string, status: ConfirmationStatus) => {
-    const success = await updateConfirmation(eventId, status);
-    if (success) {
+    try {
+      await updateConfirmation(eventId, status);
       toast({
         title: status === "confirmed" ? "Presença confirmada ✅" : "Presença recusada",
       });
+    } catch (e) {
+      console.error("Error updating confirmation:", e);
     }
   };
 

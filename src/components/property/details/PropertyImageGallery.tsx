@@ -68,8 +68,9 @@ export function PropertyImageGallery({
       </div>
       <div className="absolute top-4 right-4 flex gap-2 z-10">
         <button
-          className={`w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center hover:bg-card transition-colors ${isFavorite ? "text-rose-500" : "text-muted-foreground"
-            }`}
+          className={`w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center hover:bg-card transition-colors ${
+            isFavorite ? "text-rose-500" : "text-muted-foreground"
+          }`}
           onClick={(e) => {
             e.preventDefault();
             onToggleFavorite();
@@ -130,10 +131,11 @@ export function PropertyImageGallery({
             <button
               key={index}
               onClick={() => onSelectImage(index)}
-              className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
-                ? "border-primary"
-                : "border-transparent opacity-70 hover:opacity-100"
-                }`}
+              className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                selectedImage === index
+                  ? "border-primary"
+                  : "border-transparent opacity-70 hover:opacity-100"
+              }`}
             >
               <img src={image} alt="" className="w-full h-full object-cover" />
             </button>

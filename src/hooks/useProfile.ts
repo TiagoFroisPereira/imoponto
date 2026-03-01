@@ -13,7 +13,7 @@ export interface Profile {
   phone_visible: boolean;
   plan_type: string | null;
   premium_until: string | null;
-  notification_settings: Record<string, boolean>;
+  notification_settings?: Record<string, boolean>;
   created_at: string;
   updated_at: string;
   plan?: string | null;
@@ -50,9 +50,9 @@ export function useProfile() {
       if (!user) throw new Error("Not authenticated");
 
       const { error } = await (supabase
-        .from('profiles') as any)
+        .from('profiles')
         .update(updates)
-        .eq('id', user.id);
+        .eq('id', user.id) as any);
 
       if (error) throw error;
       return updates;

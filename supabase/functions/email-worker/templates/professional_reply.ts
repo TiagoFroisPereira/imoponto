@@ -14,7 +14,7 @@ export const professionalReplyTemplate = (data: any) => `
   <div class="divider"></div>
   
   <p style="text-align: center;">
-    <a href="https://imoponto.pt/dashboard/servicos-profissionais" class="button">Ver Detalhes do Serviço</a>
+    <a href="https://imoponto.pt/mensagens" class="button">Ver Detalhes do Serviço</a>
   </p>
   
   <p style="margin-top: 30px; font-weight: 600; color: #1e293b;">

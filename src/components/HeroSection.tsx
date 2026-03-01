@@ -56,10 +56,10 @@ const HeroSection = () => {
               size="lg"
               className="text-primary-foreground/90 hover:text-primary-foreground hover:bg-primary-foreground/10"
             >
-              <a href="#como-funciona">
+              <Link to="/sem-comissoes">
                 <Play className="w-4 h-4 mr-2" />
                 Como funciona
-              </a>
+              </Link>
             </Button>
           </div>
 

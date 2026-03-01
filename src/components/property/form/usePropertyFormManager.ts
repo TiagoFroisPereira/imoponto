@@ -8,6 +8,7 @@ import { parseISO } from "date-fns";
 import type { AvailableDay } from "@/components/property/VisitScheduler";
 import type { UploadedImage } from "./propertyFormConstants";
 import { defaultTimeSlots } from "./propertyFormConstants";
+import { getAllConcelhos } from "@/data/portugalLocations";
 
 export function usePropertyFormManager(mode: 'create' | 'edit' | 'publish', propertyId?: string) {
   const navigate = useNavigate();
@@ -106,7 +107,23 @@ export function usePropertyFormManager(mode: 'create' | 'edit' | 'publish', prop
       setVirtualTourUrl(property.virtual_tour_url || '');
       setPrice(property.price?.toString() || '');
       setAddress(property.address || '');
-      setConcelho(property.location || '');
+      if (property.location) {
+        const parts = property.location.split(",").map((s: string) => s.trim());
+        if (parts.length >= 2) {
+          setDistrito(parts[0]);
+          setConcelho(parts[1]);
+        } else {
+          // Fallback: if only one part, it's likely the concelho
+          const concName = parts[0];
+          setConcelho(concName);
+          // Try to find the distrito from our data
+          const allConcs = getAllConcelhos();
+          const match = allConcs.find(c => c.name.toLowerCase() === concName.toLowerCase());
+          if (match) {
+            setDistrito(match.distrito);
+          }
+        }
+      }
       setPostalCode(property.postal_code || '');
       setArea(property.area?.toString() || '');
       setGrossArea(property.gross_area?.toString() || '');
@@ -242,7 +259,7 @@ export function usePropertyFormManager(mode: 'create' | 'edit' | 'publish', prop
   const getPropertyData = (overrides: any = {}) => ({
     title, description,
     price: parseFloat(price) || 0,
-    address, location: concelho || "",
+    address, location: (distrito && concelho) ? `${distrito}, ${concelho}` : (concelho || ""),
     postal_code: postalCode,
     property_type: propertyType || 'apartment',
     transaction_type: transactionType,

@@ -428,12 +428,12 @@ export function MessagesInbox({ userId, propertyId, onRead }: MessagesInboxProps
                 </div>
               ) : (
                 displayedConversations.map((conversation) => (
-                  <div
-                    key={conversation.id}
-                    className={`relative border-b border-border/50 ${selectedConversation?.id === conversation.id ? "bg-muted" : ""
-                      } ${conversation.unread_count > 0 && selectedConversation?.id !== conversation.id ? "bg-primary/10 border-l-4 border-l-primary" : ""
-                      } ${chatSelectionMode && selectedChatIds.has(conversation.id) ? "ring-2 ring-primary ring-inset" : ""}`}
-                  >
+                    <div
+                      key={conversation.id}
+                      className={`relative border-b border-border/50 ${selectedConversation?.id === conversation.id ? "bg-muted" : ""
+                        } ${conversation.unread_count > 0 && selectedConversation?.id !== conversation.id ? "bg-primary/10 border-l-4 border-l-primary" : ""
+                        } ${chatSelectionMode && selectedChatIds.has(conversation.id) ? "ring-2 ring-primary ring-inset" : ""}`}
+                    >
                     <div className="flex items-start">
                       {chatSelectionMode && (
                         <div className="flex-shrink-0 pl-4 pt-5">
@@ -443,63 +443,63 @@ export function MessagesInbox({ userId, propertyId, onRead }: MessagesInboxProps
                           />
                         </div>
                       )}
-                      <button
-                        onClick={() => chatSelectionMode ? toggleChatSelection(conversation.id) : handleSelectConversation(conversation)}
-                        className="w-full p-4 text-left hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${conversation.unread_count > 0 ? "bg-primary/20" : "bg-muted"
-                            }`}>
-                            {getSenderIcon(conversation)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <p
-                                  className={`font-medium text-foreground truncate cursor-pointer hover:underline hover:text-primary transition-colors ${conversation.unread_count > 0 ? "font-bold" : ""}`}
-                                  onClick={(e) => handleNavigateToParticipant(conversation, e)}
-                                >
-                                  {getFormattedParticipantName(conversation.other_participant).displayName}
-                                </p>
-                                {getFormattedParticipantName(conversation.other_participant).isVerified && (
-                                  <ShieldCheck className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                )}
-                              </div>
-                              {conversation.unread_count > 0 && (
-                                <Badge variant="default" className="ml-auto flex-shrink-0">
-                                  {conversation.unread_count}
-                                </Badge>
+                    <button
+                      onClick={() => chatSelectionMode ? toggleChatSelection(conversation.id) : handleSelectConversation(conversation)}
+                      className="w-full p-4 text-left hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${conversation.unread_count > 0 ? "bg-primary/20" : "bg-muted"
+                          }`}>
+                          {getSenderIcon(conversation)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <p
+                                className={`font-medium text-foreground truncate cursor-pointer hover:underline hover:text-primary transition-colors ${conversation.unread_count > 0 ? "font-bold" : ""}`}
+                                onClick={(e) => handleNavigateToParticipant(conversation, e)}
+                              >
+                                {getFormattedParticipantName(conversation.other_participant).displayName}
+                              </p>
+                              {getFormattedParticipantName(conversation.other_participant).isVerified && (
+                                <ShieldCheck className="w-4 h-4 text-green-600 flex-shrink-0" />
                               )}
                             </div>
-                            {getFormattedParticipantName(conversation.other_participant).badge && (
-                              <p className="text-xs text-indigo-600 font-medium mt-0.5 flex items-center gap-1">
-                                <Briefcase className="w-3 h-3 flex-shrink-0" />
-                                {getFormattedParticipantName(conversation.other_participant).badge}
-                              </p>
+                            {conversation.unread_count > 0 && (
+                              <Badge variant="default" className="ml-auto flex-shrink-0">
+                                {conversation.unread_count}
+                              </Badge>
                             )}
-                            {conversation.property_title && (
-                              <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1 truncate">
-                                <Building2 className="w-3 h-3 flex-shrink-0" />
-                                {conversation.property_title}
-                              </p>
-                            )}
-                            {conversation.last_message && (
-                              <p className="text-sm text-muted-foreground truncate mt-1">
-                                {conversation.last_message.content.length > 60
-                                  ? `${conversation.last_message.content.substring(0, 60)}...`
-                                  : conversation.last_message.content}
-                              </p>
-                            )}
-                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                              <Clock className="w-3 h-3" />
-                              {conversation.last_message_at && formatDistanceToNow(
-                                new Date(conversation.last_message_at),
-                                { addSuffix: true, locale: pt }
-                              )}
-                            </p>
                           </div>
+                          {getFormattedParticipantName(conversation.other_participant).badge && (
+                            <p className="text-xs text-indigo-600 font-medium mt-0.5 flex items-center gap-1">
+                              <Briefcase className="w-3 h-3 flex-shrink-0" />
+                              {getFormattedParticipantName(conversation.other_participant).badge}
+                            </p>
+                          )}
+                          {conversation.property_title && (
+                            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1 truncate">
+                              <Building2 className="w-3 h-3 flex-shrink-0" />
+                              {conversation.property_title}
+                            </p>
+                          )}
+                          {conversation.last_message && (
+                            <p className="text-sm text-muted-foreground truncate mt-1">
+                              {conversation.last_message.content.length > 60
+                                ? `${conversation.last_message.content.substring(0, 60)}...`
+                                : conversation.last_message.content}
+                            </p>
+                          )}
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                            <Clock className="w-3 h-3" />
+                            {conversation.last_message_at && formatDistanceToNow(
+                              new Date(conversation.last_message_at),
+                              { addSuffix: true, locale: pt }
+                            )}
+                          </p>
                         </div>
-                      </button>
+                      </div>
+                    </button>
                     </div>
 
                     {/* Actions Menu - hide in selection mode */}
@@ -666,12 +666,13 @@ export function MessagesInbox({ userId, propertyId, onRead }: MessagesInboxProps
                             </div>
                           )}
                           <div
-                            className={`max-w-[75%] rounded-lg px-4 py-2 cursor-default ${selectionMode && selectedMessageIds.has(message.id)
+                            className={`max-w-[75%] rounded-lg px-4 py-2 cursor-default ${
+                              selectionMode && selectedMessageIds.has(message.id)
                                 ? "ring-2 ring-primary ring-offset-1"
                                 : ""
-                              } ${message.sender_id === currentUserId
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted"
+                            } ${message.sender_id === currentUserId
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
                               }`}
                             onClick={selectionMode ? () => toggleMessageSelection(message.id) : undefined}
                           >

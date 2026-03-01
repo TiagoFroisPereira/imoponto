@@ -8,6 +8,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import { useToast } from "@/hooks/use-toast";
 import { useProfessionalStatus } from "@/hooks/useProfessionalStatus";
 import { useAuthModal } from "@/contexts/AuthModalContext";
+import { usePublicProperties } from "@/hooks/usePublicProperties";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -17,6 +18,8 @@ const Header = () => {
   const { toast } = useToast();
   const { openAuthModal } = useAuthModal();
   const { data: professionalStatus } = useProfessionalStatus();
+  const { properties } = usePublicProperties({ limit: 1 });
+  const hasProperties = properties.length > 0;
 
   // Check if professional needs to complete profile
   useEffect(() => {
@@ -35,9 +38,9 @@ const Header = () => {
   }, [user, loading, location.pathname, professionalStatus]);
 
   const navLinks = [
-    { label: "Imóveis", href: "/imoveis", icon: Search },
-    { label: "Serviços", href: "/servicos", icon: Users },
-  ];
+    { label: "Imóveis", href: "/imoveis", icon: Search, show: hasProperties },
+    { label: "Serviços", href: "/servicos", icon: Users, show: true },
+  ].filter(link => link.show);
 
   const handleSignOut = async () => {
     const { error } = await signOut();

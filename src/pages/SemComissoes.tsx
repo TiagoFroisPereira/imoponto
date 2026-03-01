@@ -24,7 +24,7 @@ const steps = [
   {
     number: "01",
     title: "Criação e Preparação",
-    description: "Crie o seu imóvel e organize a documentação no Cofre Digital. Pode optar por publicar o anúncio ou gerir a venda de forma privada.",
+    description: "Crie o seu anúncio e organize a documentação no Cofre Digital. Pode optar por publicar o anúncio ou gerir a venda de forma privada.",
     icon: ClipboardList,
     color: "from-blue-500/20 to-cyan-500/20",
     iconColor: "text-blue-500",
@@ -48,7 +48,7 @@ const steps = [
   {
     number: "04",
     title: "Formalização Jurídica",
-    description: "Garantimos o apoio necessário para a criação do CPCV e preparação da Escritura com profissionais verificados.",
+    description: "Escolha na lista de serviços o profissional pretendido para redigir o CPCV e/ou Escritura.",
     icon: FileSignature,
     color: "from-emerald-500/20 to-teal-500/20",
     iconColor: "text-emerald-500",

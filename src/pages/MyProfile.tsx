@@ -50,9 +50,9 @@ export default function MyProfile() {
   const loading = profileLoading || propertiesLoading || profLoading;
 
   const planLabels: Record<string, string> = {
-    'free': 'Plano Essencial',
-    'start': 'Plano Destaque',
-    'pro': 'Plano Premium Pro'
+    'free': 'Plano Free',
+    'start': 'Plano Start',
+    'pro': 'Plano Pro'
   };
 
   useEffect(() => {

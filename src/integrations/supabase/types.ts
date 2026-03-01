@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action_type: string
+          admin_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_entity_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_entity_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_entity_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
+      admin_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       contact_requests: {
         Row: {
           created_at: string
@@ -87,6 +141,7 @@ export type Database = {
           is_read_by_seller: boolean | null
           last_message_at: string | null
           property_id: string
+          property_title: string | null
           seller_id: string
           updated_at: string
         }
@@ -98,6 +153,7 @@ export type Database = {
           is_read_by_seller?: boolean | null
           last_message_at?: string | null
           property_id: string
+          property_title?: string | null
           seller_id: string
           updated_at?: string
         }
@@ -109,6 +165,7 @@ export type Database = {
           is_read_by_seller?: boolean | null
           last_message_at?: string | null
           property_id?: string
+          property_title?: string | null
           seller_id?: string
           updated_at?: string
         }
@@ -185,7 +242,9 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
+          is_archived: boolean | null
           is_read: boolean | null
+          message_type: string | null
           sender_id: string
         }
         Insert: {
@@ -193,7 +252,9 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
+          is_archived?: boolean | null
           is_read?: boolean | null
+          message_type?: string | null
           sender_id: string
         }
         Update: {
@@ -201,7 +262,9 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
+          is_archived?: boolean | null
           is_read?: boolean | null
+          message_type?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -356,6 +419,12 @@ export type Database = {
           autonomy_declaration_2_accepted: boolean
           category_selected: string
           created_at: string
+          credit_autonomy: boolean | null
+          credit_dl_compliance: boolean | null
+          credit_insurance_rc: boolean | null
+          credit_reg_active: boolean | null
+          credit_reg_banco_portugal: boolean | null
+          credit_scope_authorized: boolean | null
           id: string
           insurance_declaration_accepted: boolean | null
           ip_address: string | null
@@ -371,6 +440,12 @@ export type Database = {
           autonomy_declaration_2_accepted?: boolean
           category_selected: string
           created_at?: string
+          credit_autonomy?: boolean | null
+          credit_dl_compliance?: boolean | null
+          credit_insurance_rc?: boolean | null
+          credit_reg_active?: boolean | null
+          credit_reg_banco_portugal?: boolean | null
+          credit_scope_authorized?: boolean | null
           id?: string
           insurance_declaration_accepted?: boolean | null
           ip_address?: string | null
@@ -386,6 +461,12 @@ export type Database = {
           autonomy_declaration_2_accepted?: boolean
           category_selected?: string
           created_at?: string
+          credit_autonomy?: boolean | null
+          credit_dl_compliance?: boolean | null
+          credit_insurance_rc?: boolean | null
+          credit_reg_active?: boolean | null
+          credit_reg_banco_portugal?: boolean | null
+          credit_scope_authorized?: boolean | null
           id?: string
           insurance_declaration_accepted?: boolean | null
           ip_address?: string | null
@@ -595,8 +676,13 @@ export type Database = {
           phone: string | null
           phone_verified: boolean | null
           phone_visible: boolean | null
+          plan: string
           plan_type: string | null
           premium_until: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_current_period_end: string | null
+          subscription_status: string | null
           updated_at: string
         }
         Insert: {
@@ -609,8 +695,13 @@ export type Database = {
           phone?: string | null
           phone_verified?: boolean | null
           phone_visible?: boolean | null
+          plan?: string
           plan_type?: string | null
           premium_until?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_current_period_end?: string | null
+          subscription_status?: string | null
           updated_at?: string
         }
         Update: {
@@ -623,8 +714,13 @@ export type Database = {
           phone?: string | null
           phone_verified?: boolean | null
           phone_visible?: boolean | null
+          plan?: string
           plan_type?: string | null
           premium_until?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_current_period_end?: string | null
+          subscription_status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -762,6 +858,7 @@ export type Database = {
           expires_at: string | null
           id: string
           property_id: string
+          updated_at: string
         }
         Insert: {
           addon_type: string
@@ -769,6 +866,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           property_id: string
+          updated_at?: string
         }
         Update: {
           addon_type?: string
@@ -776,6 +874,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           property_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -851,6 +950,7 @@ export type Database = {
           scheduled_for: string
           sent_at: string | null
           status: string
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -863,6 +963,7 @@ export type Database = {
           scheduled_for: string
           sent_at?: string | null
           status?: string
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -875,6 +976,7 @@ export type Database = {
           scheduled_for?: string
           sent_at?: string | null
           status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -905,6 +1007,27 @@ export type Database = {
           ip_address?: string | null
           terms_version?: string
           user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -976,7 +1099,9 @@ export type Database = {
         Row: {
           buyer_id: string
           created_at: string
+          expires_at: string | null
           id: string
+          ip_address: string | null
           message: string | null
           owner_id: string
           payment_amount: number
@@ -984,12 +1109,15 @@ export type Database = {
           property_id: string
           rejection_reason: string | null
           status: string
+          terms_accepted: boolean
           updated_at: string
         }
         Insert: {
           buyer_id: string
           created_at?: string
+          expires_at?: string | null
           id?: string
+          ip_address?: string | null
           message?: string | null
           owner_id: string
           payment_amount?: number
@@ -997,12 +1125,15 @@ export type Database = {
           property_id: string
           rejection_reason?: string | null
           status?: string
+          terms_accepted?: boolean
           updated_at?: string
         }
         Update: {
           buyer_id?: string
           created_at?: string
+          expires_at?: string | null
           id?: string
+          ip_address?: string | null
           message?: string | null
           owner_id?: string
           payment_amount?: number
@@ -1010,6 +1141,7 @@ export type Database = {
           property_id?: string
           rejection_reason?: string | null
           status?: string
+          terms_accepted?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -1080,7 +1212,9 @@ export type Database = {
       }
       vault_documents: {
         Row: {
+          category: string | null
           created_at: string
+          expiry_date: string | null
           file_size: string | null
           file_type: string
           file_url: string
@@ -1093,7 +1227,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
+          expiry_date?: string | null
           file_size?: string | null
           file_type: string
           file_url: string
@@ -1106,7 +1242,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           created_at?: string
+          expiry_date?: string | null
           file_size?: string | null
           file_type?: string
           file_url?: string
@@ -1285,10 +1423,24 @@ export type Database = {
       }
       get_participant_event_ids: {
         Args: { check_user_id: string }
-        Returns: string[]
+        Returns: {
+          event_id: string
+        }[]
       }
       get_professional_contact: { Args: { prof_id: string }; Returns: Json }
-      get_user_event_ids: { Args: { check_user_id: string } tracker: string[] }
+      get_user_event_ids: {
+        Args: { check_user_id: string }
+        Returns: {
+          id: string
+        }[]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_event_creator_of: {
         Args: { creator_uid: string; participant_uid: string }
         Returns: boolean
@@ -1307,6 +1459,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       service_category: "juridico" | "financeiro" | "tecnico" | "marketing"
     }
     CompositeTypes: {
@@ -1321,120 +1474,121 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
+    ? R
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
+      Insert: infer I
+    }
+    ? I
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
+      Update: infer U
+    }
+    ? U
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       service_category: ["juridico", "financeiro", "tecnico", "marketing"],
     },
   },

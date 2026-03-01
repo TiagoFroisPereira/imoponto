@@ -69,10 +69,6 @@ const Services = () => {
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
               Profissionais Verificados
             </h1>
-            <p className="text-lg text-muted-foreground">
-              Encontre advogados, notários, avaliadores e outros profissionais para
-              o seu processo imobiliário. Avaliações reais, total transparência.
-            </p>
           </div>
 
 
@@ -91,10 +87,9 @@ const Services = () => {
                   </p>
                   <ul className="space-y-3">
                     {[
-                      "Advogados e Solicitadores especializados",
+                      "Advogados e Notários especializados",
                       "Intermediários de Crédito vinculados",
-                      "Engenheiros e Peritos Criminais",
-                      "Fotógrafos e profissionais de Marketing"
+                      "Técnicos de certificação energética"
                     ].map((item, i) => (
                       <li key={i} className="flex items-center gap-2 text-sm text-foreground/80 font-medium">
                         <div className="w-1.5 h-1.5 rounded-full bg-accent" />
