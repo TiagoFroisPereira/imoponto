@@ -55,6 +55,7 @@ import AdminLogs from "./pages/admin/AdminLogs";
 import { MessagingProvider } from "./contexts/MessagingContext";
 import { AuthModalProvider } from "./contexts/AuthModalContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { Analytics } from "@vercel/analytics/react"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +72,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <BrowserRouter>
+        <Analytics />
         <AuthProvider>
           <AuthModalProvider>
             <MessagingProvider>

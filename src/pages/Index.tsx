@@ -12,9 +12,8 @@ const Index = () => {
     <div className="bg-background">
       <HeroSection />
       <DifferentiationSection />
-      <SavingsCalculator />
       <FeaturesSection />
-      
+
       <ServicesSection />
       <HowItWorksSection />
       <CTASection />
