@@ -1,7 +1,8 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Lock, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import VaultConsentDialog from "../VaultConsentDialog";
+import { QuickCheckoutDialog } from "@/components/checkout/QuickCheckoutDialog";
 
 interface VaultPaywallProps {
   showPaywall: boolean;
@@ -18,7 +19,7 @@ export function VaultPaywall({
   consentDialogOpen,
   setConsentDialogOpen,
 }: VaultPaywallProps) {
-  const navigate = useNavigate();
+  const [showQuickCheckout, setShowQuickCheckout] = useState(false);
 
   if (!showPaywall && !needsConsent) return null;
 
@@ -35,7 +36,7 @@ export function VaultPaywall({
             Pode desbloquear esta funcionalidade para este imóvel ou aderir a um plano profissional.
           </p>
           <div className="flex flex-col gap-3 w-full">
-            <Button onClick={() => navigate(`/checkout?type=addon&id=vault&propertyId=${propertyId}`)}>
+            <Button onClick={() => setShowQuickCheckout(true)}>
               <Zap className="w-4 h-4 mr-2" />
               Desbloquear Funcionalidade (35€)
             </Button>
@@ -64,6 +65,13 @@ export function VaultPaywall({
           />
         </div>
       )}
+
+      <QuickCheckoutDialog
+        open={showQuickCheckout}
+        onOpenChange={setShowQuickCheckout}
+        productKey="vault"
+        propertyId={propertyId}
+      />
     </div>
   );
 }

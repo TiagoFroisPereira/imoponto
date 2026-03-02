@@ -14,7 +14,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfessionalsWithReviews, categoryLabels, ServiceCategory } from "@/hooks/useProfessionals";
 import { StarRating } from "@/components/services/StarRating";
-import { User, MapPin, Shield, Euro, Filter, Scale, Landmark, Ruler, Megaphone, Eye, Loader2 } from "lucide-react";
+import { User, MapPin, Shield, Euro, Filter, Scale, Landmark, Ruler, Megaphone, Eye, Loader2, Zap } from "lucide-react";
+import { QuickCheckoutDialog } from "@/components/checkout/QuickCheckoutDialog";
+import { purchaseAddon } from "@/lib/stripe";
 
 interface AddProfessionalDialogProps {
   open: boolean;
@@ -52,6 +54,7 @@ export function AddProfessionalDialog({
   const [confirmChecked, setConfirmChecked] = useState(false);
   const [requestingSelfAccess, setRequestingSelfAccess] = useState(false);
   const [contactedProfessionalIds, setContactedProfessionalIds] = useState<Set<string>>(new Set());
+  const [showQuickCheckout, setShowQuickCheckout] = useState(false);
 
   // Fetch previously contacted professionals
   useEffect(() => {
@@ -75,10 +78,10 @@ export function AddProfessionalDialog({
   // Sort professionals: contacted first
   const sortedProfessionals = professionals
     ? [...professionals].sort((a, b) => {
-        const aContacted = contactedProfessionalIds.has(a.id) ? 0 : 1;
-        const bContacted = contactedProfessionalIds.has(b.id) ? 0 : 1;
-        return aContacted - bContacted;
-      })
+      const aContacted = contactedProfessionalIds.has(a.id) ? 0 : 1;
+      const bContacted = contactedProfessionalIds.has(b.id) ? 0 : 1;
+      return aContacted - bContacted;
+    })
     : [];
   const handleToggleProfessional = (professionalId: string) => {
     setSelectedProfessionals((prev) =>
@@ -159,8 +162,10 @@ export function AddProfessionalDialog({
 
       toast({
         title: "Pedido enviado!",
-        description: "O proprietário será notificado. Após aprovação, será solicitado o pagamento de €10.",
+        description: "O proprietário será notificado. Após aprovação, poderá pagar o acesso por €10.",
       });
+      // Optionally trigger checkout here if it was already approved? 
+      // But the logic says "Após aprovação", so we wait.
       onOpenChange(false);
     } catch (error) {
       console.error("Error requesting self access:", error);
@@ -271,14 +276,12 @@ export function AddProfessionalDialog({
       const totalCost = selectedProfessionals.length * 10;
 
       toast({
-        title: "Pedido enviado",
-        description: `Pedido de acesso enviado para ${selectedProfessionals.length} profissional(is). Custo estimado: €${totalCost}`,
+        title: "Pedido registado",
+        description: `Os pedidos de acesso para ${selectedProfessionals.length} profissional(is) foram registados. Prossiga para o pagamento de €${totalCost}.`,
       });
 
-      setSelectedProfessionals([]);
-      setSelectedCategory(null);
-      setShowConfirmation(false);
-      setConfirmChecked(false);
+      setShowQuickCheckout(true);
+      // Main dialog is closed by the parent or via onOpenChange(false) if we want to focus on checkout
       onOpenChange(false);
     } catch (error) {
       console.error("Error adding professionals:", error);
@@ -300,7 +303,7 @@ export function AddProfessionalDialog({
         <DialogHeader>
           <DialogTitle>Solicitar Acesso a Profissional</DialogTitle>
           <DialogDescription>
-            {requestedDocumentName 
+            {requestedDocumentName
               ? `Selecione o profissional para aceder a "${requestedDocumentName}" do imóvel "${propertyTitle}".`
               : `Selecione os profissionais que terão acesso aos documentos do imóvel "${propertyTitle}".`
             }
@@ -376,11 +379,10 @@ export function AddProfessionalDialog({
               {sortedProfessionals.map((professional) => (
                 <div
                   key={professional.id}
-                  className={`flex items-start gap-4 p-4 rounded-xl border transition-all cursor-pointer ${
-                    selectedProfessionals.includes(professional.id)
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  }`}
+                  className={`flex items-start gap-4 p-4 rounded-xl border transition-all cursor-pointer ${selectedProfessionals.includes(professional.id)
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                    }`}
                   onClick={() => handleToggleProfessional(professional.id)}
                 >
                   <Checkbox
@@ -421,7 +423,7 @@ export function AddProfessionalDialog({
 
                     <div className="flex items-center gap-3 mt-2 flex-wrap">
                       <Badge variant="outline">{categoryLabels[professional.category]}</Badge>
-                      
+
                       {professional.location && (
                         <span className="text-xs text-muted-foreground flex items-center gap-1">
                           <MapPin className="w-3 h-3" />
@@ -483,9 +485,9 @@ export function AddProfessionalDialog({
                     className="mt-0.5"
                   />
                   <label htmlFor="confirm-fees" className="text-sm text-foreground leading-relaxed cursor-pointer">
-                    Confirmo que o profissional foi previamente contactado e/ou estou ciente de que os honorários 
-                    são definidos diretamente com o profissional. A <strong>Imoponto não define, não cobra e não intervém 
-                    nos honorários</strong>, atuando exclusivamente como plataforma tecnológica.
+                    Confirmo que o profissional foi previamente contactado e/ou estou ciente de que os honorários
+                    são definidos diretamente com o profissional. A <strong>Imoponto não define, não cobra e não intervém
+                      nos honorários</strong>, atuando exclusivamente como plataforma tecnológica.
                   </label>
                 </div>
 
@@ -518,14 +520,14 @@ export function AddProfessionalDialog({
           <div className="text-center py-8 text-muted-foreground">
             <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
             <p>
-              {selectedCategory 
+              {selectedCategory
                 ? `Não há profissionais disponíveis na categoria "${categoryLabels[selectedCategory]}".`
                 : "Não há profissionais disponíveis de momento."
               }
             </p>
             {selectedCategory && (
-              <Button 
-                variant="link" 
+              <Button
+                variant="link"
                 onClick={() => setSelectedCategory(null)}
                 className="mt-2"
               >
@@ -535,6 +537,19 @@ export function AddProfessionalDialog({
           </div>
         )}
       </DialogContent>
+
+      <QuickCheckoutDialog
+        open={showQuickCheckout}
+        onOpenChange={setShowQuickCheckout}
+        productKey="vault_access"
+        propertyId={propertyId}
+        quantity={selectedProfessionals.length}
+        metadata={{
+          professional_ids: selectedProfessionals.join(","),
+          document_ids: vaultDocumentIds.join(","),
+          request_type: "professional_access"
+        }}
+      />
     </Dialog>
   );
 }

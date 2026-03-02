@@ -12,6 +12,7 @@ import StepDetails from "./StepDetails";
 import StepMedia from "./StepMedia";
 import StepVault from "./StepVault";
 import FormNavigation from "./FormNavigation";
+import { QuickCheckoutDialog } from "@/components/checkout/QuickCheckoutDialog";
 
 const PropertyForm = ({ mode, propertyId }: PropertyFormProps) => {
   const mgr = usePropertyFormManager(mode, propertyId);
@@ -92,6 +93,7 @@ const PropertyForm = ({ mode, propertyId }: PropertyFormProps) => {
             hasVaultFeature={hasFeature('vault')}
             onSaveDraft={mgr.handleSaveDraft}
             openPlanModal={mgr.openPlanModal}
+            onVaultRequired={() => { mgr.setQuickCheckoutProductKey("vault"); mgr.setShowQuickCheckout(true); }}
           />
         )}
 
@@ -117,6 +119,14 @@ const PropertyForm = ({ mode, propertyId }: PropertyFormProps) => {
         onOpenChange={mgr.setShowPlanModal}
         title={mgr.planModalTitle}
         description={mgr.planModalDesc}
+      />
+
+      <QuickCheckoutDialog
+        open={mgr.showQuickCheckout}
+        onOpenChange={mgr.setShowQuickCheckout}
+        productKey={mgr.quickCheckoutProductKey}
+        propertyId={propertyId}
+        onBeforeCheckout={mgr.saveDraftAndReturnId}
       />
     </div>
   );

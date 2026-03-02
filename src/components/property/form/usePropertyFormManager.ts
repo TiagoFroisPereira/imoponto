@@ -62,6 +62,9 @@ export function usePropertyFormManager(mode: 'create' | 'edit' | 'publish', prop
   const [planModalTitle, setPlanModalTitle] = useState("");
   const [planModalDesc, setPlanModalDesc] = useState("");
 
+  const [showQuickCheckout, setShowQuickCheckout] = useState(false);
+  const [quickCheckoutProductKey, setQuickCheckoutProductKey] = useState("");
+
   const [isLoadingPostalCode, setIsLoadingPostalCode] = useState(false);
 
   // Fetch property data
@@ -199,7 +202,8 @@ export function usePropertyFormManager(mode: 'create' | 'edit' | 'publish', prop
     if (!files) return;
 
     if (images.length + Array.from(files).length > photosLimit) {
-      openPlanModal("Limite de Fotografias", `O seu plano atual permite até ${photosLimit} fotografias. Pode desbloquear +15 fotos com um Power-up ou fazer upgrade para um plano profissional.`);
+      setQuickCheckoutProductKey("extra_photos");
+      setShowQuickCheckout(true);
       return;
     }
 
@@ -223,7 +227,8 @@ export function usePropertyFormManager(mode: 'create' | 'edit' | 'publish', prop
     if (!files) return;
 
     if (videos.length + Array.from(files).length > videosLimit) {
-      openPlanModal("Limite de Vídeos", `O seu plano atual permite até ${videosLimit} vídeo(s). Pode desbloquear esta funcionalidade para este imóvel com um Power-up ou mudar para o plano Pro.`);
+      setQuickCheckoutProductKey("video");
+      setShowQuickCheckout(true);
       return;
     }
 
@@ -280,26 +285,36 @@ export function usePropertyFormManager(mode: 'create' | 'edit' | 'publish', prop
     ...overrides
   });
 
-  const handleSaveDraft = async () => {
+  const saveDraftAndReturnId = async () => {
     if (!title) {
       toast({ title: "Título necessário", description: "Por favor insira pelo menos um título para poder guardar o rascunho.", variant: "destructive" });
       return;
     }
-    setIsSubmitting(true);
     try {
       const data = getPropertyData({ status: 'rascunho' });
       let result;
       if (mode === 'edit' && propertyId) {
         result = await updateProperty(propertyId, data);
+        return propertyId;
       } else {
         result = await createProperty(data);
+        return result?.id;
       }
-      if (result) {
+    } catch (error) {
+      console.error("Error saving draft silently:", error);
+      throw error;
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    setIsSubmitting(true);
+    try {
+      const id = await saveDraftAndReturnId();
+      if (id) {
         toast({ title: "Rascunho guardado com sucesso", description: "Pode continuar a preencher os dados mais tarde." });
         navigate("/meus-imoveis");
       }
     } catch (error) {
-      console.error("Error saving draft:", error);
       toast({ title: "Erro ao guardar rascunho", description: "Ocorreu um problema, por favor tente novamente.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
@@ -421,7 +436,9 @@ export function usePropertyFormManager(mode: 'create' | 'edit' | 'publish', prop
     // Handlers
     handlePostalCodeChange, handleImageUpload, handleVideoUpload,
     removeImage, removeVideo, setMainImage,
-    handleSaveDraft, handleSubmit, nextStep, prevStep, handleStepClick,
+    handleSaveDraft, saveDraftAndReturnId, handleSubmit, nextStep, prevStep, handleStepClick,
     openPlanModal,
+    showQuickCheckout, setShowQuickCheckout,
+    quickCheckoutProductKey, setQuickCheckoutProductKey,
   };
 }

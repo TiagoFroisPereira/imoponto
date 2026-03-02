@@ -6,6 +6,9 @@ export interface CreateCheckoutParams {
     productKey?: string; // New: identify product by key
     billingPeriod?: 'monthly' | 'yearly'; // New: for plans
     vaultRequestId?: string; // For one-time payments
+    propertyId?: string; // New: context for addons
+    quantity?: number; // New: for multiple addons (e.g. professional access)
+    metadata?: Record<string, any>; // New: extra context
     successUrl?: string;
     cancelUrl?: string;
 }

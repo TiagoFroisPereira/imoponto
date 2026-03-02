@@ -45,15 +45,15 @@ serve(async (req) => {
 
         const adminClient = createClient(supabaseUrl, supabaseServiceKey)
         const body = await req.json()
-        const { mode, priceId: initialPriceId, productKey, billingPeriod, vaultRequestId, successUrl, cancelUrl } = body
+        const { mode, priceId: initialPriceId, productKey, billingPeriod, vaultRequestId, propertyId, quantity, metadata, successUrl, cancelUrl } = body
 
         let priceId = initialPriceId
 
-        // If productKey is provided, fetch the priceId from the database
+        // If productKey is provided, fetch the priceId and type from the database
         if (productKey && !priceId) {
             const { data: product, error: dbError } = await adminClient
                 .from('plans_addons')
-                .select('stripe_price_id, stripe_yearly_price_id')
+                .select('stripe_price_id, stripe_yearly_price_id, type')
                 .eq('key', productKey)
                 .single()
 
@@ -65,12 +65,24 @@ serve(async (req) => {
             // Select the correct price ID based on billing period
             priceId = billingPeriod === 'yearly' ? product.stripe_yearly_price_id : product.stripe_price_id
 
-            // Fallback to monthly if yearly not found (or vice-versa for addons which only have one price)
+            // Fallback to monthly if yearly not found
             if (!priceId) {
                 priceId = product.stripe_price_id || product.stripe_yearly_price_id
             }
 
             if (!priceId) throw new Error(`Stripe price not configured for: ${productKey}${billingPeriod ? ` (${billingPeriod})` : ''}`)
+
+            // Automatically determine mode from product type if not explicitly overridden to something valid
+            // If it's a plan, it MUST be a subscription. If it's an addon, it's a one-time payment.
+            const resolvedMode = product.type === 'plan' ? 'subscription' : 'payment'
+
+            // Log for debugging
+            console.log(`Resolved mode for ${productKey}: ${resolvedMode} (Product type: ${product.type})`)
+
+            // Update the mode to match the product type
+            var finalMode: 'payment' | 'subscription' = resolvedMode
+        } else {
+            var finalMode: 'payment' | 'subscription' = (mode as any) || 'payment'
         }
 
         const { data: profile } = await adminClient
@@ -93,53 +105,58 @@ serve(async (req) => {
         }
 
         // Define payment methods based on mode
-        // Multibanco is only for one-time payments
         const paymentMethods: Stripe.Checkout.SessionCreateParams.PaymentMethodType[] =
-            mode === 'subscription'
-                ? ['card'] // Simplest for subscriptions
+            finalMode === 'subscription'
+                ? ['card']
                 : ['card', 'multibanco', 'mb_way'];
 
         const sessionConfig: Stripe.Checkout.SessionCreateParams = {
             customer: customerId,
             payment_method_types: paymentMethods,
+            mode: finalMode as any,
             locale: 'pt',
             success_url: successUrl || `${req.headers.get('origin')}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: cancelUrl || `${req.headers.get('origin')}/pagamentos/cancelado`,
-            metadata: { user_id: user.id },
+            metadata: {
+                user_id: user.id,
+                property_id: propertyId,
+                product_key: productKey,
+                ...metadata
+            },
         }
 
-        if (mode === 'subscription') {
-            sessionConfig.mode = 'subscription'
-            sessionConfig.line_items = [{ price: priceId, quantity: 1 }]
-            sessionConfig.subscription_data = {
-                metadata: { user_id: user.id },
-            }
-        } else if (mode === 'payment') {
-            sessionConfig.mode = 'payment'
-
-            // If we have a priceId, use it. Otherwise use price_data as fallback
-            if (priceId) {
-                sessionConfig.line_items = [{ price: priceId, quantity: 1 }]
-            } else {
-                sessionConfig.line_items = [
-                    {
-                        price_data: {
-                            currency: 'eur',
-                            product_data: {
-                                name: 'Acesso ao Cofre Digital',
-                                description: 'Acesso único aos documentos do imóvel',
-                            },
-                            unit_amount: 1000,
+        // Add line items
+        if (priceId) {
+            sessionConfig.line_items = [{ price: priceId, quantity: quantity || 1 }]
+        } else if (finalMode === 'payment') {
+            // Fallback for professional access where we might not have a priceId yet?
+            // Actually we should always have a priceId now, but keeping as safety.
+            sessionConfig.line_items = [
+                {
+                    price_data: {
+                        currency: 'eur',
+                        product_data: {
+                            name: productKey === 'vault_access' ? 'Acesso ao Cofre Digital' : 'Serviço ImoPonto',
+                            description: 'Pagamento único de serviço',
                         },
-                        quantity: 1,
+                        unit_amount: 1000,
                     },
-                ]
+                    quantity: quantity || 1,
+                },
+            ]
+        }
+
+        if (finalMode === 'subscription') {
+            sessionConfig.subscription_data = {
+                metadata: {
+                    user_id: user.id,
+                    property_id: propertyId,
+                    product_key: productKey,
+                    ...metadata
+                },
             }
+        } else {
             sessionConfig.metadata.vault_request_id = vaultRequestId
-            // Tag with product key if available for webhook handling
-            if (productKey) {
-                sessionConfig.metadata.product_key = productKey
-            }
         }
 
         const session = await stripe.checkout.sessions.create(sessionConfig)

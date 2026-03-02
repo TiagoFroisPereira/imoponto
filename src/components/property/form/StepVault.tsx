@@ -10,9 +10,10 @@ interface StepVaultProps {
   hasVaultFeature: boolean;
   onSaveDraft: () => void;
   openPlanModal: (title: string, desc: string) => void;
+  onVaultRequired?: () => void;
 }
 
-const StepVault = ({ propertyId, propertyTitle, mode, hasVaultFeature, onSaveDraft, openPlanModal }: StepVaultProps) => {
+const StepVault = ({ propertyId, propertyTitle, mode, hasVaultFeature, onSaveDraft, openPlanModal, onVaultRequired }: StepVaultProps) => {
   return (
     <Card className="relative overflow-hidden">
       {!hasVaultFeature && (
@@ -25,8 +26,8 @@ const StepVault = ({ propertyId, propertyTitle, mode, hasVaultFeature, onSaveDra
             O Cofre Digital é uma funcionalidade exclusiva dos planos Destaque e Premium Pro.
             Armazene documentos de forma segura e facilite o processo de venda.
           </p>
-          <Button onClick={() => openPlanModal("Cofre Digital", "O Cofre Digital permite armazenar com segurança toda a documentação do imóvel. Faça upgrade para aceder a esta funcionalidade.")}>
-            Fazer Upgrade
+          <Button onClick={onVaultRequired || (() => openPlanModal("Cofre Digital", "O Cofre Digital permite armazenar com segurança toda a documentação do imóvel. Faça upgrade para aceder a esta funcionalidade."))}>
+            Ativar Cofre Digital
           </Button>
         </div>
       )}
