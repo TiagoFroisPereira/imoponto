@@ -150,9 +150,35 @@ export function useVaultManager(propertyId: string, propertyTitle?: string) {
         return;
       }
 
-      const timestamp = Date.now();
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${propertyId}/${timestamp}-${file.name}`;
+
+      // Step 1: Create the database record first
+      // This holds the category and name metadata
+      const { data: doc, error: insertError } = await supabase
+        .from('vault_documents')
+        .insert({
+          property_id: propertyId,
+          user_id: user.id,
+          name: file.name,
+          file_type: fileExt || 'unknown',
+          file_url: 'pending-upload', // Placeholder until trigger updates it
+          file_size: formatFileSize(file.size),
+          category: category,
+          is_public: false,
+          status: 'pending_upload' // Distinguish from 'pending' (uploaded)
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        toast({ title: "Erro", description: "Não foi possível iniciar o carregamento", variant: "destructive" });
+        return;
+      }
+
+      // Step 2: Upload to storage using the DB ID as the filename
+      // This is 100% agnostic of categories in the path
+      const fileName = `${user.id}/${propertyId}/${doc.id}${fileExt ? `.${fileExt}` : ''}`;
 
       const { error: uploadError } = await supabase.storage
         .from('vault-documents')
@@ -160,31 +186,15 @@ export function useVaultManager(propertyId: string, propertyTitle?: string) {
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
+        // Optional: cleanup the record if upload fails
+        await supabase.from('vault_documents').delete().eq('id', doc.id);
         toast({ title: "Erro no upload", description: uploadError.message, variant: "destructive" });
         return;
       }
 
-      const { data: { publicUrl } } = supabase.storage.from('vault-documents').getPublicUrl(fileName);
-
-      const { error: insertError } = await supabase
-        .from('vault_documents')
-        .insert({
-          property_id: propertyId,
-          user_id: user.id,
-          name: file.name,
-          file_type: fileExt || 'unknown',
-          file_url: publicUrl,
-          file_size: formatFileSize(file.size),
-          category: category,
-          is_public: false,
-          status: 'pending'
-        });
-
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        toast({ title: "Erro", description: "Não foi possível guardar o documento", variant: "destructive" });
-        return;
-      }
+      // Step 3: Wait a moment for the database trigger to update the status to 'pending'
+      // and set the final file_url
+      await new Promise(resolve => setTimeout(resolve, 800));
 
       await queryClient.invalidateQueries({ queryKey: ['vault-documents', propertyId] });
 
