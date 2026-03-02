@@ -26,53 +26,13 @@ import { subscribeToPlan, purchaseVaultAccess, purchaseAddon } from "@/lib/strip
 
 import { useQuery } from "@tanstack/react-query";
 
-const ADDONS = {
-    vault: {
-        name: "Cofre Digital",
-        price: "35€",
-        icon: ShieldCheck,
-        description: "Armazenamento seguro de documentos",
-        lifetime: true,
-    },
-    extra_photos: {
-        name: "Pack Extra Fotos",
-        price: "4,90€",
-        icon: Camera,
-        description: "+15 fotografias em alta definição",
-        lifetime: true,
-    },
-    video: {
-        name: "Video & 3D Tour",
-        price: "9,90€",
-        icon: Video,
-        description: "Suporte para vídeos e visitas virtuais",
-        lifetime: true,
-    },
-    promotion: {
-        name: "Destaque Platinum",
-        price: "14,90€",
-        icon: Star,
-        description: "Top 3 resultados e selo de destaque",
-        lifetime: false,
-        duration: "30 Dias",
-    },
-};
-
-const PLANS = {
-    start: {
-        name: "Plano Start",
-        price: "9,90€",
-        icon: Zap,
-        description: "Mais visibilidade e ferramentas",
-        period: "/ mês",
-    },
-    pro: {
-        name: "Plano Pro",
-        price: "19,90€",
-        icon: Building2,
-        description: "Máxima exposição para múltiplos imóveis",
-        period: "/ mês",
-    },
+const ICON_MAP: Record<string, any> = {
+    vault: ShieldCheck,
+    extra_photos: Camera,
+    video: Video,
+    promotion: Star,
+    start: Zap,
+    pro: Building2,
 };
 
 export default function Checkout() {
@@ -81,7 +41,7 @@ export default function Checkout() {
     const { toast } = useToast();
 
     const type = searchParams.get("type"); // 'addon' | 'plan' | 'vault_access'
-    const id = searchParams.get("id"); // e.g., 'vault', 'pro'
+    const id = searchParams.get("id"); // e.g., 'vault', 'pro' (this is our 'key' in DB)
     const propertyId = searchParams.get("propertyId");
     const period = searchParams.get("period"); // 'monthly' | 'yearly'
     const requestId = searchParams.get("requestId"); // vault_buyer_access request id
@@ -92,6 +52,22 @@ export default function Checkout() {
 
     // Check if this is a vault access payment
     const isVaultAccess = type === "vault_access" && requestId;
+
+    // Fetch product details from DB
+    const { data: product, isLoading: productLoading } = useQuery({
+        queryKey: ['plans-addons-item', id],
+        queryFn: async () => {
+            if (!id || isVaultAccess) return null;
+            const { data, error } = await supabase
+                .from('plans_addons')
+                .select('*')
+                .eq('key', id)
+                .single();
+            if (error) throw error;
+            return data;
+        },
+        enabled: !!id && !isVaultAccess
+    });
 
     // Fetch vault access request details
     const { data: vaultRequest } = useQuery({
@@ -126,27 +102,24 @@ export default function Checkout() {
         enabled: !!effectivePropertyId
     });
 
-    // Get item details for non-vault-access types
-    const item = type === "addon" ? ADDONS[id as keyof typeof ADDONS] : type === "plan" ? PLANS[id as keyof typeof PLANS] : null;
-
     const displayPrice = isVaultAccess
         ? '10€'
         : (type === 'plan' && period === 'yearly')
-            ? (id === 'start' ? '99€' : '199€')
-            : item?.price;
+            ? `€${product?.yearly_price}`
+            : `€${product?.price}`;
 
     const displayPeriod = isVaultAccess
         ? 'Pagamento Único — Acesso por 30 dias'
         : type === 'plan'
             ? (period === 'yearly' ? 'Subscrição Anual' : 'Subscrição Mensal')
-            : (item && (item as any).lifetime ? 'Pagamento Único' : '30 Dias');
+            : 'Pagamento Único';
 
     useEffect(() => {
         if (isVaultAccess) return; // vault_access is valid
-        if (!type || !id || !item) {
+        if (!productLoading && (!type || !id || (!product && !isVaultAccess))) {
             navigate("/planos");
         }
-    }, [type, id, item, navigate, isVaultAccess]);
+    }, [type, id, product, productLoading, navigate, isVaultAccess]);
 
     // Redirect if vault request already paid or invalid
     useEffect(() => {
@@ -168,12 +141,6 @@ export default function Checkout() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Não autenticado");
 
-            if (paymentMethod === "mbway") {
-                // Keep simulation for MB Way for now as it's not fully implemented in the stripe lib
-                await new Promise(resolve => setTimeout(resolve, 1500));
-                // ... same logic as before for simulation if needed, but the user wants real Stripe for card
-            }
-
             if (isVaultAccess && requestId) {
                 await purchaseVaultAccess(requestId);
             } else if (type === "addon" && propertyId) {
@@ -192,7 +159,8 @@ export default function Checkout() {
         }
     };
 
-    if (!isVaultAccess && !item) return null;
+    if (productLoading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin" /></div>;
+    if (!isVaultAccess && !product) return null;
 
     if (isSuccess) {
         return (
@@ -214,11 +182,11 @@ export default function Checkout() {
         );
     }
 
-    const ItemIcon = isVaultAccess ? Eye : (item?.icon || ShieldCheck);
-    const itemName = isVaultAccess ? "Acesso ao Cofre Digital" : item?.name || "";
+    const ItemIcon = isVaultAccess ? Eye : (ICON_MAP[id || ''] || ShieldCheck);
+    const itemName = isVaultAccess ? "Acesso ao Cofre Digital" : product?.name || "";
     const itemDescription = isVaultAccess
         ? "Acesso aos documentos do imóvel aprovado pelo proprietário"
-        : item?.description || "";
+        : product?.description || "";
 
     return (
         <div className="bg-muted/30">
@@ -309,21 +277,10 @@ export default function Checkout() {
                                 </RadioGroup>
 
                                 {paymentMethod === "card" ? (
-                                    <div className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="cardNumber">Número do Cartão</Label>
-                                            <Input id="cardNumber" placeholder="0000 0000 0000 0000" disabled={isProcessing} />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label htmlFor="expiry">Validade</Label>
-                                                <Input id="expiry" placeholder="MM/AA" disabled={isProcessing} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="cvv">CVV</Label>
-                                                <Input id="cvv" placeholder="123" disabled={isProcessing} />
-                                            </div>
-                                        </div>
+                                    <div className="space-y-4 animate-in fade-in slide-in-from-right-2 duration-300 text-center py-4">
+                                        <p className="text-sm text-muted-foreground">
+                                            Será redirecionado para a página de pagamento seguro do Stripe para concluir a sua compra.
+                                        </p>
                                     </div>
                                 ) : (
                                     <div className="space-y-4 animate-in fade-in slide-in-from-left-2 duration-300">

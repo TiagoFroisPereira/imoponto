@@ -141,7 +141,6 @@ export type Database = {
           is_read_by_seller: boolean | null
           last_message_at: string | null
           property_id: string
-          property_title: string | null
           seller_id: string
           updated_at: string
         }
@@ -153,7 +152,6 @@ export type Database = {
           is_read_by_seller?: boolean | null
           last_message_at?: string | null
           property_id: string
-          property_title?: string | null
           seller_id: string
           updated_at?: string
         }
@@ -165,7 +163,6 @@ export type Database = {
           is_read_by_seller?: boolean | null
           last_message_at?: string | null
           property_id?: string
-          property_title?: string | null
           seller_id?: string
           updated_at?: string
         }
@@ -242,9 +239,7 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
-          is_archived: boolean | null
           is_read: boolean | null
-          message_type: string | null
           sender_id: string
         }
         Insert: {
@@ -252,9 +247,7 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
-          is_archived?: boolean | null
           is_read?: boolean | null
-          message_type?: string | null
           sender_id: string
         }
         Update: {
@@ -262,9 +255,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
-          is_archived?: boolean | null
           is_read?: boolean | null
-          message_type?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -320,6 +311,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plans_addons: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          description: string | null
+          id: string
+          key: string
+          name: string
+          price: number
+          stripe_price_id: string | null
+          stripe_yearly_price_id: string | null
+          type: string
+          updated_at: string | null
+          yearly_price: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key: string
+          name: string
+          price?: number
+          stripe_price_id?: string | null
+          stripe_yearly_price_id?: string | null
+          type: string
+          updated_at?: string | null
+          yearly_price?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key?: string
+          name?: string
+          price?: number
+          stripe_price_id?: string | null
+          stripe_yearly_price_id?: string | null
+          type?: string
+          updated_at?: string | null
+          yearly_price?: number | null
+        }
+        Relationships: []
       }
       professional_event_participants: {
         Row: {
@@ -858,7 +894,6 @@ export type Database = {
           expires_at: string | null
           id: string
           property_id: string
-          updated_at: string
         }
         Insert: {
           addon_type: string
@@ -866,7 +901,6 @@ export type Database = {
           expires_at?: string | null
           id?: string
           property_id: string
-          updated_at?: string
         }
         Update: {
           addon_type?: string
@@ -874,7 +908,6 @@ export type Database = {
           expires_at?: string | null
           id?: string
           property_id?: string
-          updated_at?: string
         }
         Relationships: [
           {
@@ -950,7 +983,6 @@ export type Database = {
           scheduled_for: string
           sent_at: string | null
           status: string
-          updated_at: string
           user_id: string
         }
         Insert: {
@@ -963,7 +995,6 @@ export type Database = {
           scheduled_for: string
           sent_at?: string | null
           status?: string
-          updated_at?: string
           user_id: string
         }
         Update: {
@@ -976,7 +1007,6 @@ export type Database = {
           scheduled_for?: string
           sent_at?: string | null
           status?: string
-          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1099,9 +1129,7 @@ export type Database = {
         Row: {
           buyer_id: string
           created_at: string
-          expires_at: string | null
           id: string
-          ip_address: string | null
           message: string | null
           owner_id: string
           payment_amount: number
@@ -1109,15 +1137,12 @@ export type Database = {
           property_id: string
           rejection_reason: string | null
           status: string
-          terms_accepted: boolean
           updated_at: string
         }
         Insert: {
           buyer_id: string
           created_at?: string
-          expires_at?: string | null
           id?: string
-          ip_address?: string | null
           message?: string | null
           owner_id: string
           payment_amount?: number
@@ -1125,15 +1150,12 @@ export type Database = {
           property_id: string
           rejection_reason?: string | null
           status?: string
-          terms_accepted?: boolean
           updated_at?: string
         }
         Update: {
           buyer_id?: string
           created_at?: string
-          expires_at?: string | null
           id?: string
-          ip_address?: string | null
           message?: string | null
           owner_id?: string
           payment_amount?: number
@@ -1141,7 +1163,6 @@ export type Database = {
           property_id?: string
           rejection_reason?: string | null
           status?: string
-          terms_accepted?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -1212,9 +1233,7 @@ export type Database = {
       }
       vault_documents: {
         Row: {
-          category: string | null
           created_at: string
-          expiry_date: string | null
           file_size: string | null
           file_type: string
           file_url: string
@@ -1227,9 +1246,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          category?: string | null
           created_at?: string
-          expiry_date?: string | null
           file_size?: string | null
           file_type: string
           file_url: string
@@ -1242,9 +1259,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          category?: string | null
           created_at?: string
-          expiry_date?: string | null
           file_size?: string | null
           file_type?: string
           file_url?: string
@@ -1352,6 +1367,30 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          interests: string[]
+          source: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          interests?: string[]
+          source?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          interests?: string[]
+          source?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       professionals_public: {
@@ -1423,17 +1462,10 @@ export type Database = {
       }
       get_participant_event_ids: {
         Args: { check_user_id: string }
-        Returns: {
-          event_id: string
-        }[]
+        Returns: string[]
       }
       get_professional_contact: { Args: { prof_id: string }; Returns: Json }
-      get_user_event_ids: {
-        Args: { check_user_id: string }
-        Returns: {
-          id: string
-        }[]
-      }
+      get_user_event_ids: { Args: { check_user_id: string }; Returns: string[] }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

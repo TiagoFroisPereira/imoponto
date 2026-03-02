@@ -45,7 +45,33 @@ serve(async (req) => {
 
         const adminClient = createClient(supabaseUrl, supabaseServiceKey)
         const body = await req.json()
-        const { mode, priceId, vaultRequestId, successUrl, cancelUrl } = body
+        const { mode, priceId: initialPriceId, productKey, billingPeriod, vaultRequestId, successUrl, cancelUrl } = body
+
+        let priceId = initialPriceId
+
+        // If productKey is provided, fetch the priceId from the database
+        if (productKey && !priceId) {
+            const { data: product, error: dbError } = await adminClient
+                .from('plans_addons')
+                .select('stripe_price_id, stripe_yearly_price_id')
+                .eq('key', productKey)
+                .single()
+
+            if (dbError || !product) {
+                console.error('Error fetching product from DB:', dbError)
+                throw new Error(`Product mapping not found for: ${productKey}`)
+            }
+
+            // Select the correct price ID based on billing period
+            priceId = billingPeriod === 'yearly' ? product.stripe_yearly_price_id : product.stripe_price_id
+
+            // Fallback to monthly if yearly not found (or vice-versa for addons which only have one price)
+            if (!priceId) {
+                priceId = product.stripe_price_id || product.stripe_yearly_price_id
+            }
+
+            if (!priceId) throw new Error(`Stripe price not configured for: ${productKey}${billingPeriod ? ` (${billingPeriod})` : ''}`)
+        }
 
         const { data: profile } = await adminClient
             .from('profiles')
@@ -90,20 +116,30 @@ serve(async (req) => {
             }
         } else if (mode === 'payment') {
             sessionConfig.mode = 'payment'
-            sessionConfig.line_items = [
-                {
-                    price_data: {
-                        currency: 'eur',
-                        product_data: {
-                            name: 'Acesso ao Cofre Digital',
-                            description: 'Acesso único aos documentos do imóvel',
+
+            // If we have a priceId, use it. Otherwise use price_data as fallback
+            if (priceId) {
+                sessionConfig.line_items = [{ price: priceId, quantity: 1 }]
+            } else {
+                sessionConfig.line_items = [
+                    {
+                        price_data: {
+                            currency: 'eur',
+                            product_data: {
+                                name: 'Acesso ao Cofre Digital',
+                                description: 'Acesso único aos documentos do imóvel',
+                            },
+                            unit_amount: 1000,
                         },
-                        unit_amount: 1000,
+                        quantity: 1,
                     },
-                    quantity: 1,
-                },
-            ]
+                ]
+            }
             sessionConfig.metadata.vault_request_id = vaultRequestId
+            // Tag with product key if available for webhook handling
+            if (productKey) {
+                sessionConfig.metadata.product_key = productKey
+            }
         }
 
         const session = await stripe.checkout.sessions.create(sessionConfig)

@@ -2,7 +2,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface CreateCheckoutParams {
     mode: 'subscription' | 'payment';
-    priceId?: string; // For subscriptions
+    priceId?: string; // For subscriptions (legacy)
+    productKey?: string; // New: identify product by key
+    billingPeriod?: 'monthly' | 'yearly'; // New: for plans
     vaultRequestId?: string; // For one-time payments
     successUrl?: string;
     cancelUrl?: string;
@@ -32,27 +34,16 @@ export const STRIPE_PRICES = {
 };
 
 export async function subscribeToPlan(planType: 'start' | 'pro', billingPeriod: 'monthly' | 'yearly') {
-    const priceMap = {
-        start_monthly: STRIPE_PRICES.START_MONTHLY,
-        start_yearly: STRIPE_PRICES.START_YEARLY,
-        pro_monthly: STRIPE_PRICES.PRO_MONTHLY,
-        pro_yearly: STRIPE_PRICES.PRO_YEARLY,
-    };
-
-    const priceId = priceMap[`${planType}_${billingPeriod}`];
-
-    if (!priceId) {
-        throw new Error('Invalid plan configuration');
-    }
-
+    // We now pass the productKey and billingPeriod
+    // The edge function will use this to pick the correct Stripe Price ID
     const result = await createCheckoutSession({
         mode: 'subscription',
-        priceId,
+        productKey: planType,
+        billingPeriod,
         successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
         cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
     });
 
-    // Redirect to Stripe Checkout
     if (result.url) {
         window.location.href = result.url;
     }
@@ -76,16 +67,13 @@ export async function purchaseVaultAccess(vaultRequestId: string) {
     return result;
 }
 
-export async function purchaseAddon(propertyId: string, addonType: string) {
-    // This assumes the create-checkout function is updated or handles this in the price_data
-    // For now, mirroring the existing subscription/payment structure
+export async function purchaseAddon(propertyId: string, addonKey: string) {
     const result = await createCheckoutSession({
         mode: 'payment',
-        // We might need to pass the propertyId and addonType to the edge function metadata
-        // For now, ensuring URLs are context-aware
+        productKey: addonKey,
         successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
         cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
-    } as any); // cast to any if we haven't updated CreateCheckoutParams interface yet
+    });
 
     if (result.url) {
         window.location.href = result.url;
