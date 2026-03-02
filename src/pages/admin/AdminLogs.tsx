@@ -28,15 +28,15 @@ export default function AdminLogs() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Logs Administrativos</h1>
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Data</TableHead>
               <TableHead>Ação</TableHead>
               <TableHead>Utilizador Afetado</TableHead>
-              <TableHead>Entidade</TableHead>
-              <TableHead>Detalhes</TableHead>
+              <TableHead className="hidden md:table-cell">Entidade</TableHead>
+              <TableHead className="hidden md:table-cell">Detalhes</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -51,10 +51,10 @@ export default function AdminLogs() {
                 <TableCell className="text-sm font-mono truncate max-w-[150px]">
                   {log.target_user_id ? log.target_user_id.slice(0, 8) + "..." : "—"}
                 </TableCell>
-                <TableCell className="text-sm font-mono truncate max-w-[150px]">
+                <TableCell className="text-sm font-mono truncate max-w-[150px] hidden md:table-cell">
                   {log.target_entity_id ? log.target_entity_id.slice(0, 8) + "..." : "—"}
                 </TableCell>
-                <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate">
+                <TableCell className="text-sm text-muted-foreground max-w-[200px] truncate hidden md:table-cell">
                   {log.details && Object.keys(log.details).length > 0
                     ? JSON.stringify(log.details)
                     : "—"}

@@ -64,13 +64,13 @@ export default function AdminProfessionals() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Profissionais</h1>
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Categoria</TableHead>
-              <TableHead>Localização</TableHead>
+              <TableHead className="hidden md:table-cell">Localização</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Ações</TableHead>
             </TableRow>
@@ -80,7 +80,7 @@ export default function AdminProfessionals() {
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell>{p.category}</TableCell>
-                <TableCell>{p.location || "—"}</TableCell>
+                <TableCell className="hidden md:table-cell">{p.location || "—"}</TableCell>
                 <TableCell>
                   {p.is_verified ? (
                     <Badge variant="default">Verificado</Badge>

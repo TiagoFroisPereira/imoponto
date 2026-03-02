@@ -54,31 +54,13 @@ export const WaitlistForm = () => {
     setIsSubmitting(true);
 
     try {
-      const templateData = {
+      const { error } = await supabase.from("waitlist_subscribers").insert({
         email: parsed.data,
-        interest_types: selectedInterests,
+        interests: selectedInterests,
         source: "auth_waitlist",
-      };
-
-      // Admin notification
-      const { error: adminError } = await supabase.from("email_queue").insert({
-        recipient_email: "info@imoponto.pt",
-        template_key: "waitlist_signup",
-        template_data: templateData,
-        status: "pending",
       });
 
-      if (adminError) throw adminError;
-
-      // User confirmation
-      const { error: userError } = await supabase.from("email_queue").insert({
-        recipient_email: parsed.data,
-        template_key: "waitlist_confirmation",
-        template_data: templateData,
-        status: "pending",
-      });
-
-      if (userError) throw userError;
+      if (error) throw error;
 
       setIsSubmitted(true);
       toast({

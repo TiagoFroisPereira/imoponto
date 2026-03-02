@@ -80,13 +80,13 @@ export default function AdminListings() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-foreground">Anúncios</h1>
-      <div className="flex items-center gap-4">
-        <div className="relative w-64">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1 sm:max-w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Pesquisar..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-40">
+          <SelectTrigger className="w-full sm:w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -98,26 +98,26 @@ export default function AdminListings() {
         </Select>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Título</TableHead>
-              <TableHead>Localização</TableHead>
+              <TableHead className="hidden md:table-cell">Localização</TableHead>
               <TableHead>Preço</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Data</TableHead>
+              <TableHead className="hidden md:table-cell">Data</TableHead>
               <TableHead>Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filtered.map((l) => (
               <TableRow key={l.id}>
-                <TableCell className="font-medium max-w-[200px] truncate">{l.title}</TableCell>
-                <TableCell>{l.location}</TableCell>
+                <TableCell className="font-medium max-w-[150px] truncate">{l.title}</TableCell>
+                <TableCell className="hidden md:table-cell">{l.location}</TableCell>
                 <TableCell>€{l.price?.toLocaleString()}</TableCell>
                 <TableCell>{statusBadge(l.status)}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">{format(new Date(l.created_at), "dd/MM/yyyy")}</TableCell>
+                <TableCell className="text-sm text-muted-foreground hidden md:table-cell">{format(new Date(l.created_at), "dd/MM/yyyy")}</TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     {l.status === "pending" && (

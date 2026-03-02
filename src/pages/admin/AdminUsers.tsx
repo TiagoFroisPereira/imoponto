@@ -149,9 +149,9 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-foreground">Utilizadores</h1>
-        <div className="relative w-64">
+        <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Pesquisar..."
@@ -162,15 +162,15 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
+      <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Plano</TableHead>
+              <TableHead className="hidden md:table-cell">Plano</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Registo</TableHead>
+              <TableHead className="hidden md:table-cell">Registo</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
@@ -178,10 +178,10 @@ export default function AdminUsers() {
             {filtered.map((user) => (
               <TableRow key={user.id}>
                 <TableCell className="font-medium">{user.full_name || "—"}</TableCell>
-                <TableCell>{user.email || "—"}</TableCell>
-                <TableCell>{user.plan || "free"}</TableCell>
+                <TableCell className="max-w-[120px] truncate">{user.email || "—"}</TableCell>
+                <TableCell className="hidden md:table-cell">{user.plan || "free"}</TableCell>
                 <TableCell>{getStatusBadge(user.subscription_status)}</TableCell>
-                <TableCell className="text-muted-foreground text-sm">
+                <TableCell className="text-muted-foreground text-sm hidden md:table-cell">
                   {format(new Date(user.created_at), "dd/MM/yyyy")}
                 </TableCell>
                 <TableCell>

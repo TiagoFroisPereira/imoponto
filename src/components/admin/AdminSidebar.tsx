@@ -9,12 +9,11 @@ import {
   Settings,
   LogOut,
   ClipboardList,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -26,36 +25,28 @@ const navItems = [
   { to: "/admin/definicoes", label: "Definições", icon: Settings },
 ];
 
-export function AdminSidebar() {
-  const [collapsed, setCollapsed] = useState(false);
+interface AdminSidebarProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function AdminSidebar({ open, onOpenChange }: AdminSidebarProps) {
   const location = useLocation();
   const { signOut } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     await signOut();
     navigate("/admin/login");
   };
 
-  return (
-    <aside
-      className={cn(
-        "h-screen sticky top-0 bg-card border-r border-border flex flex-col transition-all duration-200",
-        collapsed ? "w-16" : "w-60"
-      )}
-    >
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        {!collapsed && (
-          <span className="font-bold text-lg text-foreground tracking-tight">
-            Imoponto
-          </span>
-        )}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1 rounded hover:bg-muted text-muted-foreground"
-        >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+  const sidebarContent = (
+    <>
+      <div className="p-4 border-b border-border">
+        <span className="font-bold text-lg text-foreground tracking-tight">
+          Imoponto
+        </span>
       </div>
 
       <nav className="flex-1 py-4 space-y-1 px-2">
@@ -65,16 +56,16 @@ export function AdminSidebar() {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={() => isMobile && onOpenChange?.(false)}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                 isActive
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
-              title={collapsed ? item.label : undefined}
             >
               <item.icon className="w-5 h-5 shrink-0" />
-              {!collapsed && <span>{item.label}</span>}
+              <span>{item.label}</span>
             </NavLink>
           );
         })}
@@ -84,12 +75,27 @@ export function AdminSidebar() {
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive hover:bg-destructive/10 w-full transition-colors"
-          title={collapsed ? "Logout" : undefined}
         >
           <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && <span>Logout</span>}
+          <span>Logout</span>
         </button>
       </div>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="left" className="w-60 p-0 flex flex-col">
+          {sidebarContent}
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <aside className="h-screen sticky top-0 bg-card border-r border-border flex flex-col w-60">
+      {sidebarContent}
     </aside>
   );
 }
