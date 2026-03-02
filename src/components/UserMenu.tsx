@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { User, Briefcase, LogOut, Heart, KeyRound, Settings, BuildingIcon, Building2Icon, MessageCircleIcon } from "lucide-react";
+import { User, Briefcase, LogOut, Heart, KeyRound, Settings, BuildingIcon, Building2Icon, MessageCircleIcon, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 export function UserMenu() {
   const {
     user,
@@ -16,6 +17,7 @@ export function UserMenu() {
   const {
     toast
   } = useToast();
+  const { isAdmin } = useAdminAuth();
   const [isProfessional, setIsProfessional] = useState(false);
   const [hasAds, setHasAds] = useState(false);
 
@@ -151,6 +153,18 @@ export function UserMenu() {
         </div>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
+
+      {isAdmin && (
+        <>
+          <DropdownMenuItem asChild>
+            <Link to="/admin/dashboard" className="cursor-pointer font-medium text-primary hover:text-primary/80">
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Painel Admin
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+        </>
+      )}
 
       {renderMenuContent()}
 

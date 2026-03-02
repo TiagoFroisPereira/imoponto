@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, FileText, Users, LogIn, LogOut, PiggyBank, User, Search } from "lucide-react";
+import { Menu, X, Home, FileText, Users, LogIn, LogOut, PiggyBank, User, Search, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { UserMenu } from "@/components/UserMenu";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProfessionalStatus } from "@/hooks/useProfessionalStatus";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { usePublicProperties } from "@/hooks/usePublicProperties";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -18,6 +19,7 @@ const Header = () => {
   const { toast } = useToast();
   const { openAuthModal } = useAuthModal();
   const { data: professionalStatus } = useProfessionalStatus();
+  const { isAdmin } = useAdminAuth();
   const { properties } = usePublicProperties({ limit: 1 });
   const hasProperties = properties.length > 0;
 
@@ -123,6 +125,13 @@ const Header = () => {
                 <>
                   {user ? (
                     <div className="flex items-center gap-3">
+                      {isAdmin && (
+                        <Button variant="ghost" size="icon" asChild title="Painel Admin">
+                          <Link to="/admin/dashboard" className="text-primary hover:text-primary/80 transition-colors">
+                            <ShieldCheck className="h-5 w-5" />
+                          </Link>
+                        </Button>
+                      )}
                       <NotificationBell />
                       <UserMenu />
                       <Button
@@ -149,6 +158,13 @@ const Header = () => {
             <div className="flex md:hidden items-center gap-2">
               {!loading && user && (
                 <div className="flex items-center gap-2">
+                  {isAdmin && (
+                    <Button variant="ghost" size="icon" asChild>
+                      <Link to="/admin/dashboard" className="text-primary">
+                        <ShieldCheck className="h-5 w-5" />
+                      </Link>
+                    </Button>
+                  )}
                   <NotificationBell />
                   <UserMenu />
                 </div>
