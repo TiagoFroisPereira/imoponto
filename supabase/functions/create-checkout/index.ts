@@ -77,8 +77,8 @@ serve(async (req) => {
             customer: customerId,
             payment_method_types: paymentMethods,
             locale: 'pt',
-            success_url: successUrl || `${req.headers.get('origin')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: cancelUrl || `${req.headers.get('origin')}/payment/canceled`,
+            success_url: successUrl || `${req.headers.get('origin')}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: cancelUrl || `${req.headers.get('origin')}/pagamentos/cancelado`,
             metadata: { user_id: user.id },
         }
 

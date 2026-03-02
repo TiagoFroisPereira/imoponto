@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { subscribeToPlan, purchaseVaultAccess, purchaseAddon } from "@/lib/stripe";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -167,79 +168,18 @@ export default function Checkout() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("Não autenticado");
 
-            // Simulate payment processing
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (paymentMethod === "mbway") {
+                // Keep simulation for MB Way for now as it's not fully implemented in the stripe lib
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                // ... same logic as before for simulation if needed, but the user wants real Stripe for card
+            }
 
             if (isVaultAccess && requestId) {
-                // Update vault_buyer_access to paid with 30-day expiry
-                const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-                const { error } = await supabase
-                    .from("vault_buyer_access")
-                    .update({
-                        status: "paid",
-                        payment_status: "paid",
-                        expires_at: expiresAt,
-                    })
-                    .eq("id", requestId);
-
-                if (error) throw error;
-
-                // Payment notification removed - buyer payment data is private
-
-                setIsSuccess(true);
-                setTimeout(() => {
-                    navigate(effectivePropertyId ? `/imovel/${effectivePropertyId}` : '/meu-perfil');
-                    toast({
-                        title: "Acesso ao Cofre Ativado!",
-                        description: "Agora pode consultar os documentos do cofre digital. Acesso válido por 30 dias.",
-                    });
-                }, 2500);
+                await purchaseVaultAccess(requestId);
             } else if (type === "addon" && propertyId) {
-                const expiresAt = (item as any).lifetime
-                    ? null
-                    : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-
-                const { error } = await supabase
-                    .from('property_addons' as any)
-                    .insert({
-                        property_id: propertyId,
-                        addon_type: id,
-                        expires_at: expiresAt
-                    });
-
-                if (error) throw error;
-
-                setIsSuccess(true);
-                setTimeout(() => {
-                    if (id === "vault" && propertyId) {
-                        navigate(`/imovel/${propertyId}/documentos`);
-                    } else if (id === "extra_photos" || id === "video") {
-                        navigate(propertyId ? `/editar-anuncio/${propertyId}` : "/meus-imoveis");
-                    } else {
-                        navigate("/meus-imoveis");
-                    }
-                    toast({
-                        title: "Compra Concluída!",
-                        description: `${item?.name} ativado com sucesso.`,
-                    });
-                }, 2500);
+                await purchaseAddon(propertyId, id as string);
             } else if (type === "plan") {
-                const { error } = await supabase
-                    .from('profiles')
-                    .update({ plan: id })
-                    .eq('id', user.id);
-
-                if (error) throw error;
-
-                setIsSuccess(true);
-                setTimeout(() => {
-                    navigate("/meu-perfil");
-                    toast({
-                        title: "Compra Concluída!",
-                        description: `${item?.name} ativado com sucesso.`,
-                    });
-                }, 2500);
+                await subscribeToPlan(id as 'start' | 'pro', (period as 'monthly' | 'yearly') || 'monthly');
             }
         } catch (error: any) {
             console.error("Checkout error:", error);

@@ -51,6 +51,8 @@ import AdminProfessionals from "./pages/admin/AdminProfessionals";
 import AdminPlans from "./pages/admin/AdminPlans";
 import AdminSettings from "./pages/admin/AdminSettings";
 import AdminLogs from "./pages/admin/AdminLogs";
+import Success from "./pages/payment/Success";
+import Canceled from "./pages/payment/Canceled";
 
 import { MessagingProvider } from "./contexts/MessagingContext";
 import { AuthModalProvider } from "./contexts/AuthModalContext";
@@ -133,6 +135,8 @@ const App = () => (
                           <Route path="/termos-servico" element={<TermsConditions />} />
                           <Route path="/rgpd" element={<RGPD />} />
                           <Route path="/cookies" element={<Cookies />} />
+                          <Route path="/pagamentos/sucesso" element={<ProtectedRoute><Success /></ProtectedRoute>} />
+                          <Route path="/pagamentos/cancelado" element={<ProtectedRoute><Canceled /></ProtectedRoute>} />
                           <Route path="/dashboard/*" element={<Navigate to="/meu-perfil" replace />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>

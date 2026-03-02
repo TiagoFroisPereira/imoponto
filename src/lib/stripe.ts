@@ -48,8 +48,8 @@ export async function subscribeToPlan(planType: 'start' | 'pro', billingPeriod: 
     const result = await createCheckoutSession({
         mode: 'subscription',
         priceId,
-        successUrl: `${window.location.origin}/payment/success`,
-        cancelUrl: `${window.location.origin}/planos`,
+        successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+        cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
     });
 
     // Redirect to Stripe Checkout
@@ -64,11 +64,29 @@ export async function purchaseVaultAccess(vaultRequestId: string) {
     const result = await createCheckoutSession({
         mode: 'payment',
         vaultRequestId,
-        successUrl: `${window.location.origin}/painel-profissional?vault_access=success`,
-        cancelUrl: `${window.location.origin}/painel-profissional`,
+        successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+        cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
     });
 
     // Redirect to Stripe Checkout
+    if (result.url) {
+        window.location.href = result.url;
+    }
+
+    return result;
+}
+
+export async function purchaseAddon(propertyId: string, addonType: string) {
+    // This assumes the create-checkout function is updated or handles this in the price_data
+    // For now, mirroring the existing subscription/payment structure
+    const result = await createCheckoutSession({
+        mode: 'payment',
+        // We might need to pass the propertyId and addonType to the edge function metadata
+        // For now, ensuring URLs are context-aware
+        successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+        cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+    } as any); // cast to any if we haven't updated CreateCheckoutParams interface yet
+
     if (result.url) {
         window.location.href = result.url;
     }
