@@ -19,6 +19,7 @@ import {
   Target,
 } from "lucide-react";
 import ListingOptionsSection from "@/components/property/ListingOptionsSection";
+import ComparisonTable from "@/components/ComparisonTable";
 
 const steps = [
   {
@@ -124,36 +125,74 @@ export default function SemComissoes() {
     <div className="bg-background text-foreground">
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden relative">
-        <div className="absolute top-0 right-0 -mr-24 -mt-24 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      <section className="pt-20 pb-12 md:pt-40 md:pb-32 overflow-hidden relative min-h-[70vh] md:min-h-[85vh] flex items-center">
+        {/* Modern Background Elements */}
+        <div className="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000"
+            alt="Portuguese Luxury Villa"
+            className="w-full h-full object-cover opacity-15"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+        </div>
 
-        <div className="container mx-auto px-4 relative">
+        <div className="absolute top-0 right-0 -mr-24 -mt-24 w-64 h-64 md:w-[30rem] md:h-[30rem] bg-accent/10 rounded-full blur-[80px] md:blur-[120px] animate-pulse" />
+        <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-64 h-64 md:w-[30rem] md:h-[30rem] bg-primary/10 rounded-full blur-[80px] md:blur-[120px] animate-pulse" />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/10 text-accent mb-8 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-4 md:px-6 py-2 rounded-full bg-accent/10 text-accent mb-6 md:mb-10 border border-accent/20 animate-fade-in backdrop-blur-sm">
               <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">A revolução entre particulares em Portugal</span>
+              <span className="text-[10px] md:text-sm font-semibold tracking-wide uppercase">A revolução imobiliária em Portugal</span>
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight tracking-tight">
+
+            <h1 className="text-4xl md:text-7xl lg:text-8xl font-black mb-6 md:mb-10 leading-[1.2] md:leading-[1.1] tracking-tight text-foreground">
               Venda a sua casa{" "}
-              <span className="text-accent relative inline-block group">
+              <span className="text-accent relative inline-block">
                 pelo valor real
-                <div className="absolute -bottom-2 left-0 w-full h-2 bg-accent/30 rounded-full overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-full bg-accent translate-x-[-100%] animate-shimmer" />
+                <div className="absolute -bottom-2 md:-bottom-3 left-0 w-full h-1.5 md:h-3 bg-accent/20 rounded-full overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-full bg-accent/40 translate-x-[-100%] animate-shimmer" />
                 </div>
               </span>
             </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-              Mantenha o valor total da sua venda. Elimine os intermediários e poupe dezenas de milhares em comissões com ferramentas profissionais e seguras.
+
+            <p className="text-lg md:text-2xl text-muted-foreground mb-8 md:mb-14 max-w-3xl mx-auto leading-relaxed font-medium">
+              Porquê pagar <span className="text-foreground font-bold">€15.000 ou mais</span> em comissões? Mantenha o lucro total da venda com ferramentas profissionais e <span className="text-accent font-bold">sem intermediários</span>.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Button variant="accent" size="xl" onClick={handleStartListing} className="text-lg px-10 h-16 shadow-xl shadow-accent/20">
+
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
+              <Button
+                variant="accent"
+                size="xl"
+                onClick={handleStartListing}
+                className="text-lg md:text-xl px-8 md:px-12 h-16 md:h-20 shadow-2xl shadow-accent/30 hover:shadow-accent/40 hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto font-black"
+              >
                 Começar Agora
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-5 h-5 md:w-6 md:h-6 ml-3" />
               </Button>
-              <Button variant="outline" size="xl" onClick={scrollToProcess} className="text-lg px-10 h-16">
+              <Button
+                variant="outline"
+                size="xl"
+                onClick={scrollToProcess}
+                className="text-lg md:text-xl px-8 md:px-12 h-16 md:h-20 hover:bg-accent/5 transition-all duration-300 w-full sm:w-auto border-2 border-border/50 font-bold"
+              >
                 Como Funciona
               </Button>
+            </div>
+
+            <div className="mt-10 md:mt-16 flex flex-wrap justify-center gap-6 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 md:w-5 md:h-5 text-accent" />
+                <span className="text-xs md:text-base font-semibold">100% Seguro</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <PiggyBank className="w-4 h-4 md:w-5 md:h-5 text-accent" />
+                <span className="text-xs md:text-base font-semibold">0% Comissões</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 md:w-5 md:h-5 text-accent" />
+                <span className="text-xs md:text-base font-semibold">Controlo Total</span>
+              </div>
             </div>
           </div>
         </div>
@@ -164,49 +203,7 @@ export default function SemComissoes() {
         <SavingsCalculator />
       </div>
 
-      {/* Comparison Table Section */}
-      <section className="py-20 bg-muted/20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-4">
-              <Target className="w-3 h-3" />
-              <span>Transparência Máxima</span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">ImoPonto vs. Agência Tradicional</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Veja porque milhares de proprietários escolhem tomar o controlo da sua venda.
-            </p>
-          </div>
-
-          <div className="max-w-4xl mx-auto overflow-hidden rounded-3xl border border-border shadow-2xl bg-card">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-muted/50 border-b border-border">
-                  <tr>
-                    <th className="p-3 md:p-8 font-bold text-sm md:text-lg">Vantagens</th>
-                    <th className="p-3 md:p-8 font-bold text-xs md:text-lg text-destructive text-center">Agência (5% + IVA)</th>
-                    <th className="p-3 md:p-8 font-bold text-xs md:text-lg text-accent text-center">ImoPonto</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {comparisonPoints.map((point, i) => (
-                    <tr key={i} className="hover:bg-muted/30 transition-colors">
-                      <td className="p-3 md:p-8 text-xs md:text-base font-semibold">{point.label}</td>
-                      <td className="p-3 md:p-8 text-xs md:text-base text-destructive/70 text-center">{point.agency}</td>
-                      <td className="p-3 md:p-8 text-xs md:text-base text-accent font-bold text-center bg-accent/5">{point.imoponto}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="p-8 bg-accent/5 text-center border-t border-border">
-              <p className="text-accent font-bold text-xl md:text-2xl">
-                ImoPonto: Mais Dinheiro no Seu Bolso.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ComparisonTable />
 
       {/* Benefits Section */}
       <section className="py-20 md:py-32">
@@ -222,15 +219,16 @@ export default function SemComissoes() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {benefits.map((benefit, index) => (
-              <Card key={index} className="border-border/50 bg-card hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-                <CardContent className="pt-8 p-8">
-                  <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-6">
-                    <benefit.icon className="w-8 h-8 text-accent" />
+              <Card key={index} className="border-border/50 bg-card hover:shadow-[0_32px_64px_-16px_rgba(249,115,22,0.15)] hover:-translate-y-3 transition-all duration-500 overflow-hidden group">
+                <CardContent className="pt-10 p-8 relative">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-accent/5 rounded-bl-full -mr-12 -mt-12 group-hover:bg-accent/10 transition-colors" />
+                  <div className="w-16 h-16 rounded-2xl bg-accent text-white flex items-center justify-center mb-8 shadow-xl shadow-accent/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
+                    <benefit.icon className="w-8 h-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground mb-3">
+                  <h3 className="text-2xl font-black text-foreground mb-4">
                     {benefit.title}
                   </h3>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed text-lg">
                     {benefit.description}
                   </p>
                 </CardContent>
@@ -290,7 +288,7 @@ export default function SemComissoes() {
       </section>
 
       <ListingOptionsSection id="publicar" />
-      
+
     </div>
   );
 }
