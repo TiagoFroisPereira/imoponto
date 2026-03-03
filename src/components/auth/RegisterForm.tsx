@@ -46,6 +46,7 @@ export const RegisterForm = ({ registrationEnabled, onSuccess }: RegisterFormPro
     const [specialization, setSpecialization] = useState("");
     const [showLegalModal, setShowLegalModal] = useState(false);
     const [legalAccepted, setLegalAccepted] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
 
     const { toast } = useToast();
     const navigate = useNavigate();
@@ -180,22 +181,39 @@ export const RegisterForm = ({ registrationEnabled, onSuccess }: RegisterFormPro
         }
 
         setIsLoading(false);
+        setIsRegistered(true);
 
         toast({
-            title: "Conta criada!",
-            description: isProfessional
-                ? "Bem-vindo ao ImoPonto. Complete o seu perfil profissional para ativar a sua conta."
-                : "Bem-vindo ao ImoPonto.",
+            title: "Registo iniciado!",
+            description: "Por favor, verifique o seu email para confirmar a conta.",
         });
-
-        if (isProfessional) {
-            navigate("/completar-perfil-profissional");
-        } else if (onSuccess) {
-            onSuccess();
-        } else {
-            navigate("/");
-        }
     };
+
+    if (isRegistered) {
+        return (
+            <div className="text-center py-8 space-y-6">
+                <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Mail className="w-10 h-10 text-primary animate-pulse" />
+                </div>
+                <div className="space-y-2">
+                    <h3 className="text-2xl font-bold font-heading">Verifique o seu Email</h3>
+                    <p className="text-muted-foreground text-base leading-relaxed">
+                        Enviámos um link de confirmação para <strong className="text-foreground">{email}</strong>.
+                    </p>
+                </div>
+                <div className="p-4 bg-muted/50 rounded-lg text-sm text-muted-foreground">
+                    <p>Por questões de segurança, a sua conta só ficará ativa após a confirmação do email.</p>
+                </div>
+                <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => setIsRegistered(false)}
+                >
+                    Voltar ao Registo
+                </Button>
+            </div>
+        );
+    }
 
     if (!registrationEnabled) {
         return <WaitlistForm />;
@@ -369,11 +387,11 @@ export const RegisterForm = ({ registrationEnabled, onSuccess }: RegisterFormPro
                     />
                     <Label htmlFor="terms" className="text-sm font-normal text-muted-foreground">
                         Aceito os{" "}
-                        <Link to="/termos" className="text-primary hover:underline">
+                        <Link to="/termos-servico" className="text-primary hover:underline">
                             Termos de Serviço
                         </Link>{" "}
                         e a{" "}
-                        <Link to="/privacidade" className="text-primary hover:underline">
+                        <Link to="/politica-privacidade" className="text-primary hover:underline">
                             Política de Privacidade
                         </Link>
                     </Label>
