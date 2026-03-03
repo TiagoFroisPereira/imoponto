@@ -82,7 +82,7 @@ const benefits = [
   },
   {
     title: "Suporte dedicado",
-    description: "A nossa equipa está disponível para ajudar em cada etapa do processo.",
+    description: "A nossa plataforma está disponível para ajudar em cada etapa do processo.",
     icon: Users,
   },
 ];
