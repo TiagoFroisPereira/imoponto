@@ -9,6 +9,7 @@ import {
   Settings,
   LogOut,
   ClipboardList,
+  MailPlus,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -20,6 +21,7 @@ const navItems = [
   { to: "/admin/utilizadores", label: "Utilizadores", icon: Users },
   { to: "/admin/anuncios", label: "Anúncios", icon: Building2 },
   { to: "/admin/profissionais", label: "Profissionais", icon: Briefcase },
+  { to: "/admin/lista-de-espera", label: "Lista de Espera", icon: MailPlus },
   { to: "/admin/planos", label: "Planos & Pagamentos", icon: CreditCard },
   { to: "/admin/logs", label: "Logs", icon: ClipboardList },
   { to: "/admin/definicoes", label: "Definições", icon: Settings },

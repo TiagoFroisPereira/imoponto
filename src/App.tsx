@@ -47,6 +47,7 @@ import { AdminLayout } from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminListings from "./pages/admin/AdminListings";
+import AdminWaitlist from "./pages/admin/AdminWaitlist";
 import AdminProfessionals from "./pages/admin/AdminProfessionals";
 import AdminPlans from "./pages/admin/AdminPlans";
 import AdminSettings from "./pages/admin/AdminSettings";
@@ -88,6 +89,7 @@ const App = () => (
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="utilizadores" element={<AdminUsers />} />
                     <Route path="anuncios" element={<AdminListings />} />
+                    <Route path="lista-de-espera" element={<AdminWaitlist />} />
                     <Route path="profissionais" element={<AdminProfessionals />} />
                     <Route path="planos" element={<AdminPlans />} />
                     <Route path="definicoes" element={<AdminSettings />} />

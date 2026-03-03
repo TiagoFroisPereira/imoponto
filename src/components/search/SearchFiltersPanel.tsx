@@ -101,7 +101,7 @@ const FiltersContent = ({
         <Label className="text-sm font-medium mb-3 block">
           Preço: {formatPrice(filters.priceRange[0])} - {formatPrice(filters.priceRange[1])}
         </Label>
-        <Slider value={filters.priceRange} onValueChange={actions.setPriceRange} max={2000000} step={10000} className="mt-2" />
+        <Slider value={filters.priceRange} onValueChange={actions.setPriceRange} max={20000000} step={10000} className="mt-2" />
       </div>
 
       {/* Area Range */}
@@ -109,7 +109,7 @@ const FiltersContent = ({
         <Label className="text-sm font-medium mb-3 block">
           Área Útil: {filters.areaRange[0]}m² - {filters.areaRange[1]}m²
         </Label>
-        <Slider value={filters.areaRange} onValueChange={actions.setAreaRange} max={500} step={10} className="mt-2" />
+        <Slider value={filters.areaRange} onValueChange={actions.setAreaRange} max={5000} step={10} className="mt-2" />
       </div>
 
       {/* Bedrooms & Bathrooms */}
@@ -120,7 +120,7 @@ const FiltersContent = ({
             <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              {["0","1","2","3","4","5","6"].map(v => <SelectItem key={v} value={v}>{v === "6" ? "T6+" : `T${v}`}</SelectItem>)}
+              {["0", "1", "2", "3", "4", "5", "6"].map(v => <SelectItem key={v} value={v}>{v === "6" ? "T6+" : `T${v}`}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -130,7 +130,7 @@ const FiltersContent = ({
             <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              {["1","2","3","4","5"].map(v => <SelectItem key={v} value={v}>{v}+</SelectItem>)}
+              {["1", "2", "3", "4", "5"].map(v => <SelectItem key={v} value={v}>{v}+</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

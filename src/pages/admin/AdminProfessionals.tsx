@@ -17,27 +17,42 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
+const categoryLabels: Record<string, string> = {
+  juridico: "Jurídico",
+  financeiro: "Financeiro",
+  tecnico: "Técnico",
+  marketing: "Marketing",
+};
+
 export default function AdminProfessionals() {
   const [verifyId, setVerifyId] = useState<string | null>(null);
   const [deleteProf, setDeleteProf] = useState<{ id: string; name: string } | null>(null);
   const { logAction } = useAdminLogs();
   const queryClient = useQueryClient();
 
-  const { data: professionals, isLoading } = useQuery({
+  const { data: professionals, isLoading, error } = useQuery({
     queryKey: ["admin-professionals"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("professionals")
         .select("id, name, category, is_verified, is_active, location, service_type")
         .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching professionals:", error);
+        throw error;
+      }
+      console.log("Professionals fetched:", data?.length, "records");
+      return data || [];
     },
   });
 
   const handleVerify = async () => {
     if (!verifyId) return;
-    await supabase.from("professionals").update({ is_verified: true }).eq("id", verifyId);
+    const { error } = await supabase.from("professionals").update({ is_verified: true }).eq("id", verifyId);
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      return;
+    }
     await logAction("verify_professional", undefined, verifyId);
     toast({ title: "Profissional verificado" });
     queryClient.invalidateQueries({ queryKey: ["admin-professionals"] });
@@ -61,9 +76,27 @@ export default function AdminProfessionals() {
     return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
 
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold text-foreground">Profissionais</h1>
+        <div className="border rounded-lg p-8 text-center">
+          <p className="text-destructive font-medium">Erro ao carregar profissionais</p>
+          <p className="text-sm text-muted-foreground mt-1">{(error as Error).message}</p>
+          <Button variant="outline" className="mt-4" onClick={() => queryClient.invalidateQueries({ queryKey: ["admin-professionals"] })}>
+            Tentar novamente
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-foreground">Profissionais</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h1 className="text-2xl font-bold text-foreground">Profissionais</h1>
+        <Badge variant="secondary">{(professionals || []).length} registados</Badge>
+      </div>
       <div className="border rounded-lg overflow-x-auto">
         <Table>
           <TableHeader>
@@ -79,7 +112,7 @@ export default function AdminProfessionals() {
             {(professionals || []).map((p) => (
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell>{p.category}</TableCell>
+                <TableCell>{categoryLabels[p.category] || p.category}</TableCell>
                 <TableCell className="hidden md:table-cell">{p.location || "—"}</TableCell>
                 <TableCell>
                   {p.is_verified ? (

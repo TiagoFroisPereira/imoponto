@@ -67,12 +67,12 @@ export function useSearchFilters() {
   const [priceRange, setPriceRange] = useState<number[]>(() => {
     const min = searchParams.get("precoMin");
     const max = searchParams.get("precoMax");
-    return [min ? parseInt(min) : 0, max ? parseInt(max) : 2000000];
+    return [min ? parseInt(min) : 0, max ? parseInt(max) : 20000000];
   });
   const [areaRange, setAreaRange] = useState<number[]>(() => {
     const min = searchParams.get("areaMin");
     const max = searchParams.get("areaMax");
-    return [min ? parseInt(min) : 0, max ? parseInt(max) : 500];
+    return [min ? parseInt(min) : 0, max ? parseInt(max) : 5000];
   });
   const [bedrooms, setBedrooms] = useState(searchParams.get("quartos") || "");
   const [bathrooms, setBathrooms] = useState(searchParams.get("wcs") || "");
@@ -98,9 +98,9 @@ export function useSearchFilters() {
     if (selectedTypes.length > 0) params.set("tipos", selectedTypes.join(","));
     if (selectedConditions.length > 0) params.set("condicoes", selectedConditions.join(","));
     if (priceRange[0] > 0) params.set("precoMin", priceRange[0].toString());
-    if (priceRange[1] < 2000000) params.set("precoMax", priceRange[1].toString());
+    if (priceRange[1] < 20000000) params.set("precoMax", priceRange[1].toString());
     if (areaRange[0] > 0) params.set("areaMin", areaRange[0].toString());
-    if (areaRange[1] < 500) params.set("areaMax", areaRange[1].toString());
+    if (areaRange[1] < 5000) params.set("areaMax", areaRange[1].toString());
     if (bedrooms && bedrooms !== "all") params.set("quartos", bedrooms);
     if (bathrooms && bathrooms !== "all") params.set("wcs", bathrooms);
     if (energyCert && energyCert !== "all") params.set("energia", energyCert);
@@ -129,8 +129,8 @@ export function useSearchFilters() {
   const clearFilters = useCallback(() => {
     setSelectedTypes([]);
     setSelectedConditions([]);
-    setPriceRange([0, 2000000]);
-    setAreaRange([0, 500]);
+    setPriceRange([0, 20000000]);
+    setAreaRange([0, 5000]);
     setBedrooms("");
     setBathrooms("");
     setEnergyCert("");
