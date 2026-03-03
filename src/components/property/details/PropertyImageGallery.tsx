@@ -11,6 +11,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { PropertyFullscreenGallery } from "./PropertyFullscreenGallery";
 
 interface PropertyImageGalleryProps {
   images: string[];
@@ -36,6 +37,7 @@ export function PropertyImageGallery({
   const isMobile = useIsMobile();
   const [api, setApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
 
   const onSelect = useCallback(() => {
     if (!api) return;
@@ -68,9 +70,8 @@ export function PropertyImageGallery({
       </div>
       <div className="absolute top-4 right-4 flex gap-2 z-10">
         <button
-          className={`w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center hover:bg-card transition-colors ${
-            isFavorite ? "text-rose-500" : "text-muted-foreground"
-          }`}
+          className={`w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center hover:bg-card transition-colors ${isFavorite ? "text-rose-500" : "text-muted-foreground"
+            }`}
           onClick={(e) => {
             e.preventDefault();
             onToggleFavorite();
@@ -95,7 +96,10 @@ export function PropertyImageGallery({
           <CarouselContent className="-ml-0">
             {images.map((image, index) => (
               <CarouselItem key={index} className="pl-0">
-                <div className="aspect-[16/10]">
+                <div
+                  className="aspect-[16/10] cursor-zoom-in"
+                  onClick={() => setIsFullscreenOpen(true)}
+                >
                   <img
                     src={image}
                     alt={`Imóvel ${index + 1}`}
@@ -110,13 +114,22 @@ export function PropertyImageGallery({
         <div className="absolute bottom-4 right-4 bg-black/60 text-white text-sm px-3 py-1 rounded-full z-10">
           {currentSlide + 1} / {images.length}
         </div>
+        <PropertyFullscreenGallery
+          isOpen={isFullscreenOpen}
+          onClose={() => setIsFullscreenOpen(false)}
+          images={images}
+          initialIndex={selectedImage}
+        />
       </div>
     );
   }
 
   return (
     <>
-      <div className="relative rounded-2xl overflow-hidden aspect-[16/10]">
+      <div
+        className="relative rounded-2xl overflow-hidden aspect-[16/10] cursor-zoom-in"
+        onClick={() => setIsFullscreenOpen(true)}
+      >
         <img
           src={images[selectedImage]}
           alt="Imóvel"
@@ -125,17 +138,23 @@ export function PropertyImageGallery({
         {overlayButtons}
       </div>
 
+      <PropertyFullscreenGallery
+        isOpen={isFullscreenOpen}
+        onClose={() => setIsFullscreenOpen(false)}
+        images={images}
+        initialIndex={selectedImage}
+      />
+
       {images.length > 1 && (
         <div className="flex gap-3 overflow-x-auto pb-2">
           {images.map((image, index) => (
             <button
               key={index}
               onClick={() => onSelectImage(index)}
-              className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                selectedImage === index
-                  ? "border-primary"
-                  : "border-transparent opacity-70 hover:opacity-100"
-              }`}
+              className={`flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === index
+                ? "border-primary"
+                : "border-transparent opacity-70 hover:opacity-100"
+                }`}
             >
               <img src={image} alt="" className="w-full h-full object-cover" />
             </button>

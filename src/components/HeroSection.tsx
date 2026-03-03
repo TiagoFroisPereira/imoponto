@@ -2,9 +2,12 @@ import { ArrowRight, CheckCircle2, Search, Home as HomeIcon, ShieldCheck } from 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { usePublicProperties } from "@/hooks/usePublicProperties";
 
 const HeroSection = () => {
   const { user } = useAuth();
+  const { properties } = usePublicProperties({ limit: 1 });
+  const hasProperties = properties.length > 0;
 
   return (
     <section className="relative min-h-[85vh] md:min-h-screen flex items-center justify-center overflow-hidden bg-hero-gradient">
@@ -59,17 +62,19 @@ const HeroSection = () => {
               </Link>
             </Button>
 
-            <Button
-              asChild
-              variant="outline"
-              size="xl"
-              className="text-base md:text-xl px-8 md:px-12 h-14 md:h-20 hover:bg-white/5 transition-all duration-300 w-full sm:w-auto border-2 border-white/10 font-bold backdrop-blur-sm"
-            >
-              <Link to="/imoveis" className="flex items-center">
-                <Search className="w-5 h-5 mr-2 md:mr-3" />
-                <span>Explorar Imóveis</span>
-              </Link>
-            </Button>
+            {hasProperties && (
+              <Button
+                asChild
+                variant="outline"
+                size="xl"
+                className="text-base md:text-xl px-8 md:px-12 h-14 md:h-20 hover:bg-white/5 transition-all duration-300 w-full sm:w-auto border-2 border-white/10 font-bold backdrop-blur-sm"
+              >
+                <Link to="/imoveis" className="flex items-center">
+                  <Search className="w-5 h-5 mr-2 md:mr-3" />
+                  <span>Explorar Imóveis</span>
+                </Link>
+              </Button>
+            )}
           </div>
 
           <div className="mt-6 md:mt-8 px-4">
