@@ -13,7 +13,12 @@ import { LocationPriceInfo } from "@/components/property/LocationPriceInfo";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, MapPin, Loader2, Shield } from "lucide-react";
+import { ArrowLeft, MapPin, Loader2, Shield, Heart, Share2, Facebook, Instagram, Link as LinkIcon, MessageCircle } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 import { PropertyImageGallery } from "@/components/property/details/PropertyImageGallery";
 import { PropertyQuickStats } from "@/components/property/details/PropertyQuickStats";
@@ -168,14 +173,22 @@ export default function PropertyDetail() {
     ? [selectedDocRequest.documentId]
     : allDocuments.map((doc) => doc.id);
 
-  const handleShare = async () => {
+  const handleShare = (platform?: 'whatsapp' | 'facebook' | 'copy') => {
     if (!id) return;
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      await trackShare(id);
-      toast({ title: "Link copiado!", description: "O link do imóvel foi copiado para a área de transferência." });
-    } catch {
-      toast({ title: "Erro", description: "Não foi possível copiar o link.", variant: "destructive" });
+    const url = window.location.href;
+    const text = `Veja este imóvel no Imoponto: ${property.title}`;
+
+    if (platform === 'whatsapp') {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`, '_blank');
+      trackShare(id);
+    } else if (platform === 'facebook') {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+      trackShare(id);
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        trackShare(id);
+        toast({ title: "Link copiado!", description: "O link do imóvel foi copiado para a área de transferência." });
+      });
     }
   };
 
@@ -222,16 +235,72 @@ export default function PropertyDetail() {
             />
 
             <div className="space-y-6">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex gap-2 mr-2">
+                    <button
+                      className={`w-10 h-10 rounded-full bg-card shadow-sm border border-border flex items-center justify-center hover:bg-accent transition-colors ${id && isFavorite(id) ? "text-rose-500" : "text-muted-foreground"
+                        }`}
+                      onClick={handleToggleFavorite}
+                      title={id && isFavorite(id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                    >
+                      <Heart className={`w-5 h-5 ${id && isFavorite(id) ? "fill-current" : ""}`} />
+                    </button>
+
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="w-10 h-10 rounded-full bg-card shadow-sm border border-border flex items-center justify-center hover:bg-accent transition-colors text-muted-foreground"
+                          title="Partilhar imóvel"
+                        >
+                          <Share2 className="w-5 h-5" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-56 p-2" align="start">
+                        <div className="grid gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="justify-start font-normal"
+                            onClick={() => handleShare('whatsapp')}
+                          >
+                            <MessageCircle className="w-4 h-4 mr-2 text-green-500" />
+                            WhatsApp
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="justify-start font-normal"
+                            onClick={() => handleShare('facebook')}
+                          >
+                            <Facebook className="w-4 h-4 mr-2 text-blue-600" />
+                            Facebook
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="justify-start font-normal"
+                            onClick={() => handleShare()}
+                          >
+                            <LinkIcon className="w-4 h-4 mr-2" />
+                            Copiar Link
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
                   <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{property.title}</h1>
                   <DocumentationDot level={property.documentation_level as DocumentationLevel} />
                 </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="w-4 h-4" />
-                  <span>{property.location}</span>
+
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="w-4 h-4" />
+                    <span>{property.location}</span>
+                  </div>
+                  <LocationPriceInfo location={property.location} price={property.price} area={property.area} />
                 </div>
-                <LocationPriceInfo location={property.location} price={property.price} area={property.area} />
               </div>
 
               <p className="text-lg font-bold text-primary">{formatPrice(property.price)}</p>
@@ -340,7 +409,7 @@ export default function PropertyDetail() {
         </div>
       </main>
 
-      
+
 
       <PropertyDialogs
         propertyId={property.id}

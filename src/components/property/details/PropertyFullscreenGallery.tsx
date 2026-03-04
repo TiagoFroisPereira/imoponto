@@ -101,12 +101,12 @@ export function PropertyFullscreenGallery({
                             </Button>
                         )}
 
-                        <div className="relative w-full h-full flex items-center justify-center p-4 sm:p-12 select-none">
+                        <div className="relative w-full h-full flex items-center justify-center p-0.5 sm:p-2 select-none">
                             <img
                                 key={currentIndex}
                                 src={images[currentIndex]}
                                 alt={`Imagem ${currentIndex + 1}`}
-                                className="max-w-full max-h-full object-contain animate-in fade-in zoom-in-95 duration-500 shadow-2xl rounded-lg"
+                                className="max-w-full max-h-full object-contain animate-in fade-in zoom-in-95 duration-500 shadow-2xl rounded-none sm:rounded-lg"
                                 draggable={false}
                             />
                         </div>

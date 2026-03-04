@@ -64,29 +64,9 @@ export function PropertyImageGallery({
   }, [api, selectedImage]);
 
   const overlayButtons = (
-    <>
-      <div className="absolute top-4 left-4 z-10">
-        <DocumentationStatus level={documentationLevel} />
-      </div>
-      <div className="absolute top-4 right-4 flex gap-2 z-10">
-        <button
-          className={`w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center hover:bg-card transition-colors ${isFavorite ? "text-rose-500" : "text-muted-foreground"
-            }`}
-          onClick={(e) => {
-            e.preventDefault();
-            onToggleFavorite();
-          }}
-        >
-          <Heart className={`w-5 h-5 ${isFavorite ? "fill-current" : ""}`} />
-        </button>
-        <button
-          className="w-10 h-10 rounded-full bg-card/90 backdrop-blur-sm flex items-center justify-center hover:bg-card transition-colors"
-          onClick={onShare}
-        >
-          <Share2 className="w-5 h-5 text-muted-foreground" />
-        </button>
-      </div>
-    </>
+    <div className="absolute top-4 left-4 z-10">
+      <DocumentationStatus level={documentationLevel} />
+    </div>
   );
 
   if (isMobile && images.length > 1) {
