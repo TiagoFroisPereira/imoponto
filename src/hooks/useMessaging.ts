@@ -9,8 +9,7 @@ export interface Message {
   sender_id: string;
   content: string;
   is_read: boolean;
-  is_archived: boolean;
-  message_type: 'buyer_to_seller' | 'scheduling' | 'professional_contact';
+  message_type: 'buyer_to_seller' | 'scheduling' | 'professional_contact' | 'system';
   created_at: string;
 }
 
@@ -27,10 +26,13 @@ export interface ConversationWithDetails {
   id: string;
   property_id: string;
   property_title: string | null;
+  property_image: string | null;
   buyer_id: string;
   seller_id: string;
   is_read_by_buyer: boolean;
   is_read_by_seller: boolean;
+  is_archived_by_buyer: boolean;
+  is_archived_by_seller: boolean;
   last_message_at: string | null;
   created_at: string;
   last_message?: Message | null;

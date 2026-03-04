@@ -23,6 +23,7 @@ interface Product {
   stripe_yearly_price_id: string | null;
   type: 'plan' | 'addon';
   active: boolean;
+  features: string[];
 }
 
 export default function AdminPlans() {
@@ -43,7 +44,7 @@ export default function AdminPlans() {
       console.error("Error fetching products:", error);
       toast({ title: "Erro ao carregar produtos", variant: "destructive" });
     } else {
-      setProducts(data || []);
+      setProducts(data as Product[] || []);
     }
     setLoading(false);
   };
@@ -122,7 +123,8 @@ export default function AdminPlans() {
           stripe_price_id: null,
           stripe_yearly_price_id: null,
           type: 'addon',
-          active: true
+          active: true,
+          features: []
         })}>
           <Plus className="w-4 h-4 mr-2" /> Novo Produto
         </Button>
@@ -227,6 +229,53 @@ export default function AdminPlans() {
                 />
                 <p className="text-[10px] text-muted-foreground">Deixe vazio para gerar automaticamente ao sincronizar.</p>
               </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Funcionalidades (Features)</label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditProduct({
+                      ...editProduct,
+                      features: [...(editProduct.features || []), '']
+                    })}
+                  >
+                    <Plus className="w-3 h-3 mr-1" /> Add
+                  </Button>
+                </div>
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-2">
+                  {(editProduct.features || []).map((feature, idx) => (
+                    <div key={idx} className="flex gap-2">
+                      <Input
+                        value={feature}
+                        onChange={(e) => {
+                          const newFeatures = [...editProduct.features];
+                          newFeatures[idx] = e.target.value;
+                          setEditProduct({ ...editProduct, features: newFeatures });
+                        }}
+                        placeholder="Ex: 1 Imóvel extra"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive h-10 w-10 shrink-0"
+                        onClick={() => {
+                          const newFeatures = editProduct.features.filter((_, i) => i !== idx);
+                          setEditProduct({ ...editProduct, features: newFeatures });
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {(!editProduct.features || editProduct.features.length === 0) && (
+                    <p className="text-xs text-muted-foreground italic text-center py-2">Nenhuma funcionalidade adicionada.</p>
+                  )}
+                </div>
+              </div>
             </div>
           )}
           <DialogFooter>
@@ -270,6 +319,21 @@ function ProductCard({ product, onEdit, onToggle, onSync, syncing }: {
                 {product.stripe_price_id ? "Linked to Stripe" : "No Stripe Price"}
               </Badge>
             </div>
+            {product.features && product.features.length > 0 && (
+              <div className="mt-2 space-y-1">
+                <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">Features:</p>
+                <div className="flex flex-wrap gap-1">
+                  {product.features.slice(0, 3).map((f, i) => (
+                    <Badge key={i} variant="outline" className="text-[9px] px-1 py-0 h-4 bg-muted/30">
+                      {f}
+                    </Badge>
+                  ))}
+                  {product.features.length > 3 && (
+                    <span className="text-[9px] text-muted-foreground">+{product.features.length - 3} mais</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex flex-wrap gap-2 pt-2">

@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Clock, User, Mail, Phone, Loader2 } from "lucide-react";
+import { useMessaging } from "@/hooks/useMessaging";
 import type { TimeSlot } from "./VisitScheduler";
 
 interface BookVisitDialogProps {
@@ -84,7 +85,7 @@ export function BookVisitDialog({
         const { data: booking, error: bookingError } = await supabase
           .from('visit_bookings')
           .insert({
-            property_id: propertyId,
+            property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
             seller_id: sellerId,
             visitor_id: user.id,
             visitor_name: name,
@@ -110,54 +111,17 @@ export function BookVisitDialog({
         ? `Olá, tenho interesse no imóvel "${propertyTitle}" anunciado na Imoponto e gostaria de agendar uma visita para o dia ${format(selectedDate, "d 'de' MMMM", { locale: pt })} às ${selectedSlot.time}. Fico a aguardar disponibilidade. Obrigado(a).`
         : `Olá, tenho interesse no imóvel "${propertyTitle}" e gostaria de agendar uma visita. Por favor entre em contacto para combinarmos um horário. Obrigado(a).`;
 
-      // Check if conversation exists, otherwise create it
-      const { data: existingConv } = await supabase
-        .from('conversations')
-        .select('id')
-        .eq('property_id', propertyId)
-        .eq('buyer_id', user.id)
-        .eq('seller_id', sellerId)
-        .single();
+      const { createConversationAndSendMessage } = useMessaging();
+      const result = await createConversationAndSendMessage(
+        propertyId,
+        sellerId,
+        standardMessage,
+        propertyTitle,
+        'scheduling'
+      );
 
-      let conversationId: string;
+      if (!result) throw new Error('Failed to send scheduling message');
 
-      if (existingConv) {
-        conversationId = existingConv.id;
-      } else {
-        const { data: newConv, error: convError } = await supabase
-          .from('conversations')
-          .insert({
-            property_id: propertyId,
-            buyer_id: user.id,
-            seller_id: sellerId,
-            property_title: propertyTitle
-          })
-          .select()
-          .single();
-
-        if (convError) {
-          console.error('Error creating conversation:', convError);
-        } else {
-          conversationId = newConv.id;
-        }
-      }
-
-      // Send the scheduling message
-      if (conversationId!) {
-        await supabase.from('messages').insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: standardMessage,
-          message_type: 'scheduling',
-          is_archived: false
-        });
-
-        // Update conversation last_message_at
-        await supabase
-          .from('conversations')
-          .update({ last_message_at: new Date().toISOString() })
-          .eq('id', conversationId);
-      }
 
       // Create in-app notification for the seller
       await supabase

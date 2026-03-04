@@ -115,7 +115,7 @@ export function AddProfessionalDialog({
       const { data: existing } = await supabase
         .from("vault_buyer_access")
         .select("id, status")
-        .eq("property_id", propertyId)
+        .eq("property_id", (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null)
         .eq("buyer_id", user.id)
         .in("status", ["pending", "approved", "paid"]);
 
@@ -132,7 +132,7 @@ export function AddProfessionalDialog({
       }
 
       const { error } = await supabase.from("vault_buyer_access").insert({
-        property_id: propertyId,
+        property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
         buyer_id: user.id,
         owner_id: ownerId,
         message: `Pedido de acesso pessoal ao cofre do imóvel "${propertyTitle}"`,
@@ -153,7 +153,7 @@ export function AddProfessionalDialog({
 
       await supabase.from("notifications").insert({
         user_id: ownerId,
-        property_id: propertyId,
+        property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
         type: "buyer_vault_request",
         title: "Pedido de acesso ao cofre!",
         message: `${buyerName} solicitou acesso ao cofre digital do imóvel "${propertyTitle}".`,
@@ -215,7 +215,7 @@ export function AddProfessionalDialog({
           professional_id: professionalId,
           requester_id: user.id,
           vault_document_id: documentId,
-          property_id: propertyId,
+          property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
           payment_amount: 10.0,
           message: `Pedido de acesso: ${requestedDocumentName || propertyTitle}`,
           status: "pending",
@@ -233,7 +233,7 @@ export function AddProfessionalDialog({
       const { data: property } = await supabase
         .from("properties")
         .select("user_id")
-        .eq("id", propertyId)
+        .eq("id", (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null)
         .maybeSingle();
 
       // Get selected professionals names for the notification
@@ -246,7 +246,7 @@ export function AddProfessionalDialog({
       if (property?.user_id) {
         await supabase.from("notifications").insert({
           user_id: property.user_id,
-          property_id: propertyId,
+          property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
           type: "professional_added",
           title: "Profissional adicionado ao cofre!",
           message: `${selectedProfessionals.length} profissional(is) foi(ram) adicionado(s) ao cofre do imóvel "${propertyTitle}": ${selectedProfessionalNames}`,
@@ -264,7 +264,7 @@ export function AddProfessionalDialog({
         if (prof?.user_id) {
           await supabase.from("notifications").insert({
             user_id: prof.user_id,
-            property_id: propertyId,
+            property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
             type: "new_vault_access_request",
             title: "Novo pedido de acesso ao cofre!",
             message: `Recebeu um pedido de acesso ao cofre digital do imóvel "${propertyTitle}".`,
@@ -542,7 +542,7 @@ export function AddProfessionalDialog({
         open={showQuickCheckout}
         onOpenChange={setShowQuickCheckout}
         productKey="vault_access"
-        propertyId={propertyId}
+        propertyId={(propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : ""}
         quantity={selectedProfessionals.length}
         metadata={{
           professional_ids: selectedProfessionals.join(","),

@@ -232,7 +232,7 @@ export function useProfessionalEvents() {
           event_date: eventData.event_date,
           event_time: eventData.event_time || null,
           location: eventData.location || null,
-          property_id: eventData.property_id || null,
+          property_id: eventData.property_id && eventData.property_id !== "none" ? eventData.property_id : null,
         })
         .select("id")
         .single();

@@ -51,7 +51,7 @@ export function RequestBuyerAccessDialog({
       const { data: rejected } = await supabase
         .from("vault_buyer_access")
         .select("id, updated_at")
-        .eq("property_id", propertyId)
+        .eq("property_id", (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null)
         .eq("buyer_id", user.id)
         .eq("status", "rejected");
 
@@ -75,7 +75,7 @@ export function RequestBuyerAccessDialog({
       const { data: existing } = await supabase
         .from("vault_buyer_access")
         .select("id, status")
-        .eq("property_id", propertyId)
+        .eq("property_id", (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null)
         .eq("buyer_id", user.id)
         .in("status", ["pending", "approved", "paid"]);
 
@@ -102,7 +102,7 @@ export function RequestBuyerAccessDialog({
       }
 
       const { error } = await supabase.from("vault_buyer_access").insert({
-        property_id: propertyId,
+        property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
         buyer_id: user.id,
         owner_id: ownerId,
         message: message.trim() || null,
@@ -126,7 +126,7 @@ export function RequestBuyerAccessDialog({
       // Notify the owner
       await supabase.from("notifications").insert({
         user_id: ownerId,
-        property_id: propertyId,
+        property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
         type: "buyer_vault_request",
         title: "Pedido de acesso ao cofre!",
         message: `${buyerName} solicitou acesso ao cofre digital do imóvel "${propertyTitle}".`,

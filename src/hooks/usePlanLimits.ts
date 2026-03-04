@@ -36,25 +36,47 @@ export function usePlanLimits(propertyId?: string) {
     const { profile, loading: profileLoading } = useProfile();
     const userPlan = (profile?.plan || 'free') as PlanType;
 
+    const { data: planData, isLoading: planLoading } = useQuery({
+        queryKey: ['plan_limits', userPlan],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('plans_addons')
+                .select('*')
+                .eq('key', userPlan)
+                .single();
+
+            if (error) throw error;
+            return data;
+        },
+    });
+
     const { data: addons = [], isLoading: addonsLoading } = useQuery({
         queryKey: ['property_addons', propertyId],
         queryFn: async () => {
             if (!propertyId) return [];
 
-            const { data, error } = await (supabase
-                .from('property_addons' as any)
+            const { data, error } = await supabase
+                .from('property_addons')
                 .select('addon_type')
                 .eq('property_id', propertyId)
-                .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`) as any);
+                .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 
             if (error) throw error;
-            return (data || []).map((a: any) => a.addon_type) as string[];
+            return (data || []).map((a) => a.addon_type) as string[];
         },
         enabled: !!propertyId,
     });
 
-    const loading = profileLoading || (!!propertyId && addonsLoading);
-    const limits = PLAN_LIMITS[userPlan];
+    const loading = profileLoading || planLoading || (!!propertyId && addonsLoading);
+
+    // Dynamic limits from DB with fallback to hardcoded
+    const dbLimits = planData?.limits as any;
+    const limits: PlanLimits = {
+        properties: dbLimits?.properties ?? PLAN_LIMITS[userPlan].properties,
+        photos: dbLimits?.photos ?? PLAN_LIMITS[userPlan].photos,
+        videos: dbLimits?.videos ?? PLAN_LIMITS[userPlan].videos,
+        features: dbLimits?.feature_keys ?? PLAN_LIMITS[userPlan].features,
+    };
 
     const checkPhotos = (count: number) => {
         const baseLimit = limits.photos;
@@ -78,7 +100,6 @@ export function usePlanLimits(propertyId?: string) {
         if (limits.features.includes(feature)) return true;
         if (feature === 'vault' && addons.includes('vault')) return true;
         if (feature === '3d_virtual_tour' && addons.includes('video')) return true;
-        if (feature === 'priority_results' && addons.includes('promotion')) return true;
         return false;
     };
 

@@ -129,7 +129,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       conversations: {
@@ -137,6 +137,8 @@ export type Database = {
           buyer_id: string
           created_at: string
           id: string
+          is_archived_by_buyer: boolean | null
+          is_archived_by_seller: boolean | null
           is_read_by_buyer: boolean | null
           is_read_by_seller: boolean | null
           last_message_at: string | null
@@ -148,6 +150,8 @@ export type Database = {
           buyer_id: string
           created_at?: string
           id?: string
+          is_archived_by_buyer?: boolean | null
+          is_archived_by_seller?: boolean | null
           is_read_by_buyer?: boolean | null
           is_read_by_seller?: boolean | null
           last_message_at?: string | null
@@ -159,6 +163,8 @@ export type Database = {
           buyer_id?: string
           created_at?: string
           id?: string
+          is_archived_by_buyer?: boolean | null
+          is_archived_by_seller?: boolean | null
           is_read_by_buyer?: boolean | null
           is_read_by_seller?: boolean | null
           last_message_at?: string | null
@@ -230,7 +236,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       messages: {
@@ -240,6 +246,7 @@ export type Database = {
           created_at: string
           id: string
           is_read: boolean | null
+          message_type: string | null
           sender_id: string
         }
         Insert: {
@@ -248,6 +255,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_read?: boolean | null
+          message_type?: string | null
           sender_id: string
         }
         Update: {
@@ -256,6 +264,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_read?: boolean | null
+          message_type?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -266,6 +275,13 @@ export type Database = {
             referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "view_conversation_details"
+            referencedColumns: ["id"]
+          }
         ]
       }
       notifications: {
@@ -309,7 +325,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       plans_addons: {
@@ -317,8 +333,10 @@ export type Database = {
           active: boolean | null
           created_at: string | null
           description: string | null
+          features: string[] | null
           id: string
           key: string
+          limits: Json | null
           name: string
           price: number
           stripe_price_id: string | null
@@ -331,8 +349,10 @@ export type Database = {
           active?: boolean | null
           created_at?: string | null
           description?: string | null
+          features?: string[] | null
           id?: string
           key: string
+          limits?: Json | null
           name: string
           price?: number
           stripe_price_id?: string | null
@@ -345,8 +365,10 @@ export type Database = {
           active?: boolean | null
           created_at?: string | null
           description?: string | null
+          features?: string[] | null
           id?: string
           key?: string
+          limits?: Json | null
           name?: string
           price?: number
           stripe_price_id?: string | null
@@ -392,7 +414,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professional_events"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       professional_events: {
@@ -445,7 +467,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       professional_legal_acceptances: {
@@ -526,7 +548,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professionals_public"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       professional_relationships: {
@@ -584,7 +606,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       professional_reviews: {
@@ -629,7 +651,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professionals_public"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       professionals: {
@@ -916,7 +938,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       property_proposals: {
@@ -969,7 +991,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       sms_notifications: {
@@ -1122,7 +1144,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professionals_public"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       vault_buyer_access: {
@@ -1172,7 +1194,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       vault_consent_acceptances: {
@@ -1228,12 +1250,14 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       vault_documents: {
         Row: {
+          category: string | null
           created_at: string
+          expiry_date: string | null
           file_size: string | null
           file_type: string
           file_url: string
@@ -1246,7 +1270,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
+          expiry_date?: string | null
           file_size?: string | null
           file_type: string
           file_url: string
@@ -1259,7 +1285,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          category?: string | null
           created_at?: string
+          expiry_date?: string | null
           file_size?: string | null
           file_type?: string
           file_url?: string
@@ -1278,7 +1306,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       visit_availability: {
@@ -1316,7 +1344,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       visit_bookings: {
@@ -1450,6 +1478,27 @@ export type Database = {
         }
         Relationships: []
       }
+      view_conversation_details: {
+        Row: {
+          buyer_id: string | null
+          created_at: string | null
+          id: string | null
+          is_archived_by_buyer: boolean | null
+          is_archived_by_seller: boolean | null
+          is_read_by_buyer: boolean | null
+          is_read_by_seller: boolean | null
+          last_message: Json | null
+          last_message_at: string | null
+          property_id: string | null
+          property_image: string | null
+          property_title: string | null
+          seller_id: string | null
+          unread_count_buyer: number | null
+          unread_count_seller: number | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       are_co_participants: {
@@ -1506,116 +1555,116 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {

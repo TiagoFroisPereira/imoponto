@@ -42,11 +42,11 @@ export function SendMessageDialog({
   useEffect(() => {
     const checkProfile = async () => {
       if (!open) return;
-      
+
       setCheckingProfile(true);
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        
+
         if (!user) {
           setProfileComplete(false);
           return;
@@ -86,7 +86,7 @@ export function SendMessageDialog({
 
     // Re-check profile before sending
     const { data: { user } } = await supabase.auth.getUser();
-    
+
     if (!user) {
       toast({
         title: "Autenticação necessária",
@@ -127,7 +127,7 @@ export function SendMessageDialog({
         // Create notification for seller
         await supabase.from('notifications').insert({
           user_id: sellerId,
-          property_id: propertyId,
+          property_id: (propertyId && propertyId !== "null" && propertyId !== "none") ? propertyId : null,
           type: 'message',
           title: 'Nova mensagem!',
           message: `Recebeu uma nova mensagem sobre "${propertyTitle}"`,
@@ -206,8 +206,8 @@ export function SendMessageDialog({
             >
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting || !message.trim() || profileComplete === false || checkingProfile}
             >
               {isSubmitting ? (

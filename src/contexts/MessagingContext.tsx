@@ -12,8 +12,8 @@ interface MessagingContextType {
     totalUnread: number;
     currentUserId: string | null;
     fetchConversations: () => void;
-    sendMessage: (conversationId: string, content: string, messageType?: 'buyer_to_seller' | 'scheduling' | 'professional_contact') => Promise<any>;
-    createConversationAndSendMessage: (propertyId: string, sellerId: string, content: string, propertyTitle: string, messageType?: 'buyer_to_seller' | 'scheduling' | 'professional_contact') => Promise<any>;
+    sendMessage: (conversationId: string, content: string, messageType?: 'buyer_to_seller' | 'scheduling' | 'professional_contact' | 'system') => Promise<any>;
+    createConversationAndSendMessage: (propertyId: string, sellerId: string, content: string, propertyTitle: string, messageType?: 'buyer_to_seller' | 'scheduling' | 'professional_contact' | 'system') => Promise<any>;
     markAsRead: (conversationId: string) => Promise<void>;
     markAsUnread: (conversationId: string) => Promise<void>;
     archiveConversation: (conversationId: string) => Promise<void>;
@@ -34,26 +34,25 @@ export const MessagingProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         queryFn: async () => {
             if (!user) return [];
 
-            console.log('--- [MessagingContext] Fetching conversations (React Query) ---');
+            console.log('--- [MessagingContext] Fetching conversations via View ---');
 
-            // 1. Fetch conversations first
+            // 1. Fetch from the optimized view
             const { data: convData, error: convError } = await supabase
-                .from('conversations')
+                .from('view_conversation_details' as any)
                 .select('*')
                 .or(`seller_id.eq.${user.id},buyer_id.eq.${user.id}`)
                 .order('last_message_at', { ascending: false, nullsFirst: false });
 
             if (convError) throw convError;
 
-            const rawConversations = (convData || []) as any[];
-            if (rawConversations.length === 0) return [];
+            const conversationsFromView = (convData || []) as any[];
+            if (conversationsFromView.length === 0) return [];
 
-            // 2. Collect unique participant IDs
+            // 2. Fetch profiles for participants (we still need this for the display name logic)
             const participantIds = Array.from(new Set(
-                rawConversations.flatMap(c => [c.buyer_id, c.seller_id])
+                conversationsFromView.flatMap(c => [c.buyer_id, c.seller_id])
             ));
 
-            // 3. Fetch profiles and professional data
             const [profilesRes, professionalsRes] = await Promise.all([
                 supabase.from('profiles').select('id, full_name').in('id', participantIds),
                 supabase.from('professionals').select('id, user_id, name, service_type, is_verified, email').in('user_id', participantIds)
@@ -69,75 +68,56 @@ export const MessagingProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                 }];
             }));
 
-            // 4. Process conversations
-            const processedConversations = await Promise.all(
-                rawConversations.map(async (conv) => {
-                    const { data: lastMsgData } = await supabase
-                        .from('messages')
-                        .select('*')
-                        .eq('conversation_id', conv.id)
-                        .order('created_at', { ascending: false })
-                        .limit(1);
+            // 3. Simple mapping
+            return conversationsFromView.map((conv) => {
+                const isUserSeller = user.id === conv.seller_id;
+                const otherParticipantId = isUserSeller ? conv.buyer_id : conv.seller_id;
+                const otherProfile: any = profileMap.get(otherParticipantId);
+                const professionalData = otherProfile?.professionals?.[0] || null;
 
-                    const lastMessage = lastMsgData?.[0] || null;
+                const isArchived = isUserSeller ? conv.is_archived_by_seller : conv.is_archived_by_buyer;
+                const unreadCount = isUserSeller ? conv.unread_count_seller : conv.unread_count_buyer;
+                const lastMessage = conv.last_message;
 
-                    const { count: unreadCount } = await supabase
-                        .from('messages')
-                        .select('id', { count: 'exact', head: true })
-                        .eq('conversation_id', conv.id)
-                        .eq('is_read', false)
-                        .neq('sender_id', user.id);
+                let senderType: 'buyer' | 'professional' = lastMessage?.message_type === 'professional_contact' ? 'professional' : 'buyer';
 
-                    const isArchived = lastMessage?.is_archived || false;
-                    let senderType: 'buyer' | 'professional' = lastMessage?.message_type === 'professional_contact' ? 'professional' : 'buyer';
+                let participantInfo: ParticipantInfo | null = null;
+                const getDisplayName = (): string | null => {
+                    if (otherProfile?.full_name?.trim()) return otherProfile.full_name;
+                    if (otherProfile?.email) return otherProfile.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                    return null;
+                };
 
-                    const isUserSeller = user.id === conv.seller_id;
-                    const otherParticipantId = isUserSeller ? conv.buyer_id : conv.seller_id;
-                    const otherProfile: any = profileMap.get(otherParticipantId);
-                    const professionalData = otherProfile?.professionals?.[0] || null;
-
-                    let participantInfo: ParticipantInfo | null = null;
-                    const getDisplayName = (): string | null => {
-                        if (otherProfile?.full_name?.trim()) return otherProfile.full_name;
-                        if (otherProfile?.email) return otherProfile.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-                        return null;
+                const displayName = getDisplayName();
+                if (professionalData) {
+                    participantInfo = {
+                        name: professionalData.name || displayName || 'Profissional',
+                        is_professional: true,
+                        professional_area: professionalData.service_type,
+                        is_verified: professionalData.is_verified || false,
+                        professional_id: professionalData.id || null,
+                        user_id: otherParticipantId,
                     };
+                    senderType = 'professional';
+                } else {
+                    participantInfo = {
+                        name: displayName || 'Utilizador',
+                        is_professional: false,
+                        professional_area: null,
+                        is_verified: false,
+                        professional_id: null,
+                        user_id: otherParticipantId,
+                    };
+                }
 
-                    const displayName = getDisplayName();
-                    if (professionalData) {
-                        participantInfo = {
-                            name: professionalData.name || displayName || 'Profissional',
-                            is_professional: true,
-                            professional_area: professionalData.service_type,
-                            is_verified: professionalData.is_verified || false,
-                            professional_id: professionalData.id || null,
-                            user_id: otherParticipantId,
-                        };
-                        senderType = 'professional';
-                    } else if (displayName) {
-                        participantInfo = {
-                            name: displayName,
-                            is_professional: false,
-                            professional_area: null,
-                            is_verified: false,
-                            professional_id: null,
-                            user_id: otherParticipantId,
-                        };
-                    }
-
-                    return {
-                        ...conv,
-                        property_title: conv.property_title || null,
-                        last_message: lastMessage,
-                        unread_count: unreadCount || 0,
-                        sender_type: senderType,
-                        is_archived: isArchived,
-                        other_participant: participantInfo,
-                    } as ConversationWithDetails;
-                })
-            );
-
-            return processedConversations;
+                return {
+                    ...conv,
+                    unread_count: unreadCount || 0,
+                    sender_type: senderType,
+                    is_archived: isArchived,
+                    other_participant: participantInfo,
+                } as ConversationWithDetails;
+            });
         },
         enabled: !!user?.id,
         staleTime: 30000, // 30 seconds
@@ -160,8 +140,7 @@ export const MessagingProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                     conversation_id: conversationId,
                     sender_id: user.id,
                     content,
-                    message_type: messageType || 'buyer_to_seller',
-                    is_archived: false
+                    message_type: messageType || 'buyer_to_seller'
                 })
                 .select()
                 .maybeSingle();
@@ -182,20 +161,25 @@ export const MessagingProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
     });
 
-    const sendMessage = async (conversationId: string, content: string, messageType: any = 'buyer_to_seller') => {
+    const sendMessage = async (conversationId: string, content: string, messageType: 'buyer_to_seller' | 'scheduling' | 'professional_contact' | 'system' = 'buyer_to_seller') => {
         return sendMessageMutation.mutateAsync({ conversationId, content, messageType });
     };
 
-    const createConversationAndSendMessage = async (propertyId: string, sellerId: string, content: string, propertyTitle: string, messageType: any = 'buyer_to_seller') => {
+    const createConversationAndSendMessage = async (propertyId: string, sellerId: string, content: string, propertyTitle: string, messageType: 'buyer_to_seller' | 'scheduling' | 'professional_contact' | 'system' = 'buyer_to_seller') => {
         if (!user) return null;
 
-        const { data: existingConv } = await (supabase
-            .from('conversations') as any)
+        let query = (supabase.from('conversations') as any)
             .select('id')
-            .eq('property_id', propertyId)
             .eq('buyer_id', user.id)
-            .eq('seller_id', sellerId)
-            .maybeSingle();
+            .eq('seller_id', sellerId);
+
+        if (propertyId && propertyId !== "none" && propertyId !== "service-request" && propertyId !== "null") {
+            query = query.eq('property_id', propertyId);
+        } else {
+            query = query.is('property_id', null);
+        }
+
+        const { data: existingConv } = await query.maybeSingle();
 
         let conversationId: string;
         if (existingConv) {
@@ -204,10 +188,9 @@ export const MessagingProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             const { data: newConv, error: convError } = await (supabase
                 .from('conversations') as any)
                 .insert({
-                    property_id: propertyId,
+                    property_id: (propertyId && propertyId !== "none" && propertyId !== "service-request" && propertyId !== "null") ? propertyId : null,
                     buyer_id: user.id,
-                    seller_id: sellerId,
-                    property_title: propertyTitle
+                    seller_id: sellerId
                 })
                 .select()
                 .maybeSingle();
@@ -262,7 +245,26 @@ export const MessagingProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     const updateArchiveMutation = useMutation({
         mutationFn: async ({ conversationId, archived }: { conversationId: string, archived: boolean }) => {
-            await (supabase.from('messages').update({ is_archived: archived }).eq('conversation_id', conversationId) as any);
+            if (!user) return;
+
+            // Fetch current conversation to know if user is buyer or seller
+            const { data: conv } = await supabase
+                .from('conversations')
+                .select('buyer_id, seller_id')
+                .eq('id', conversationId)
+                .single();
+
+            if (!conv) return;
+
+            const isBuyer = user.id === conv.buyer_id;
+            const updateObj = isBuyer
+                ? { is_archived_by_buyer: archived }
+                : { is_archived_by_seller: archived };
+
+            await (supabase
+                .from('conversations') as any)
+                .update(updateObj)
+                .eq('id', conversationId);
         },
         onSuccess: (_, variables) => {
             toast({ title: variables.archived ? "Arquivada" : "Desarquivada", description: `Conversa ${variables.archived ? 'arquivada' : 'restaurada'} com sucesso` });

@@ -254,7 +254,7 @@ export function CreateEventDialog({ open, onOpenChange, onSubmit, professionalCa
       // Get users from conversations
       const { data: conversations } = await supabase
         .from("conversations")
-        .select("seller_id, buyer_id, property_title")
+        .select("seller_id, buyer_id")
         .or(`seller_id.eq.${user.id},buyer_id.eq.${user.id}`);
 
       if (conversations) {

@@ -119,14 +119,29 @@ export function useServiceRequests({ professionalId, onCountChange }: UseService
         source_id: request.id, property_id: request.property_id || null, is_active: true,
       });
 
-      const pId = request.property_id || "service-request";
+      const pId = request.property_id && request.property_id !== "service-request" ? request.property_id : null;
       const pTitle = request.property_title || "Pedido de Serviço";
 
-      const { data: existingConv } = await (supabase.from("conversations") as any).select("id").eq("seller_id", user.id).eq("buyer_id", request.requester_id).eq("property_id", pId).maybeSingle();
+      let query = (supabase.from("conversations") as any)
+        .select("id")
+        .eq("seller_id", user.id)
+        .eq("buyer_id", request.requester_id);
+
+      if (pId) {
+        query = query.eq("property_id", pId);
+      } else {
+        query = query.is("property_id", null);
+      }
+
+      const { data: existingConv } = await query.maybeSingle();
       let conversationId = existingConv?.id;
 
       if (!conversationId) {
-        const { data: newConv } = await (supabase.from("conversations") as any).insert({ seller_id: user.id, buyer_id: request.requester_id, property_id: pId, property_title: pTitle }).select("id").single();
+        const { data: newConv } = await (supabase.from("conversations") as any).insert({
+          seller_id: user.id,
+          buyer_id: request.requester_id,
+          property_id: pId
+        }).select("id").single();
         conversationId = newConv?.id;
       }
 

@@ -45,39 +45,9 @@ const ICON_MAP: Record<string, any> = {
     vault_access: ShieldCheck,
 };
 
-// Features mapping for plans (could be moved to DB later)
-const PLAN_FEATURES: Record<string, string[]> = {
-    free: [
-        "1 imóvel ativo",
-        "Até 5 fotografias",
-        "Ficha básica do imóvel",
-        "Visibilidade nos resultados de pesquisa",
-        "Contacto direto com compradores",
-        "Acesso ao marketplace de profissionais",
-        "Cofre Digital disponível por 35€",
-    ],
-    start: [
-        "1 imóvel ativo",
-        "Até 10 fotografias",
-        "1 vídeo",
-        "Melhor posicionamento nos resultados",
-        "Agenda de marcações de visitas",
-        "Contacto direto com compradores",
-        "Acesso ao marketplace de profissionais",
-        "Acesso ao Cofre Digital incluído",
-    ],
-    pro: [
-        "Até 3 imóveis ativos",
-        "Até 10 fotografias por imóvel",
-        "1 vídeo por imóvel",
-        "Prioridade nos resultados",
-        "Perfil verificado",
-        "Agenda de marcações de visitas",
-        "Contacto direto com compradores",
-        "Acesso ao marketplace de profissionais",
-        "Acesso ao Cofre Digital incluído",
-    ],
-};
+// Features mapping for plans (moved to DB)
+// const PLAN_FEATURES: Record<string, string[]> = { ... };
+
 
 interface SellerPlansContentProps {
     onPlanSelected?: (planName: string) => void;
@@ -177,52 +147,6 @@ export function SellerPlansContent({ onPlanSelected, showHero = true, showProfes
                 </div>
             )}
 
-            {/* Quick Addons Section */}
-            {addons && addons.length > 0 && (
-                <div className="mb-16 animate-fade-in delay-100">
-                    <div className="flex items-center gap-2 mb-6">
-                        <Zap className="w-5 h-5 text-primary" />
-                        <h2 className="text-xl font-bold">Power-ups Rápidos</h2>
-                        <Badge variant="secondary" className="ml-2 bg-primary/10 text-primary border-none text-[10px]">
-                            Soluções Pontuais
-                        </Badge>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {addons.map((addon) => {
-                            const Icon = ICON_MAP[addon.key] || Zap;
-                            return (
-                                <Card
-                                    key={addon.id}
-                                    className="group cursor-pointer hover:border-primary/50 transition-all hover:shadow-md border-border/50 bg-card/50 overflow-hidden"
-                                    onClick={() => {
-                                        setQuickCheckoutProductKey(addon.key);
-                                        setShowQuickCheckout(true);
-                                    }}
-                                >
-                                    <CardHeader className="p-4 pb-2">
-                                        <div className="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center mb-3 group-hover:bg-primary/10 transition-colors">
-                                            <Icon className="w-5 h-5 text-primary" />
-                                        </div>
-                                        <CardTitle className="text-sm font-bold group-hover:text-primary transition-colors">{addon.name}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="p-4 pt-0">
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-lg font-black">€{addon.price}</span>
-                                            <span className="text-[10px] text-muted-foreground whitespace-nowrap">Pagamento único</span>
-                                        </div>
-                                    </CardContent>
-                                    <div className="px-4 pb-4">
-                                        <Button variant="ghost" size="sm" className="w-full h-8 text-[11px] group-hover:bg-primary group-hover:text-white border border-transparent transition-all">
-                                            Selecionar
-                                        </Button>
-                                    </div>
-                                </Card>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-
             <div className="mb-8 flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-primary" />
                 <h2 className="text-xl font-bold">Planos de Subscrição</h2>
@@ -230,7 +154,7 @@ export function SellerPlansContent({ onPlanSelected, showHero = true, showProfes
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 {plans?.map((plan, index) => {
-                    const features = PLAN_FEATURES[plan.key] || [];
+                    const features = plan.features || [];
                     const isRecommended = plan.key === 'start';
 
                     return (
