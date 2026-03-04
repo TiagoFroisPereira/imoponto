@@ -8,7 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications, Notification, getNotificationTarget } from "@/hooks/useNotifications";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { 
+import {
   Bell,
   BellOff,
   Heart,
@@ -93,8 +93,9 @@ interface NotificationsInboxProps {
 export function NotificationsInbox({ userId }: NotificationsInboxProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { notifications, loading, unreadCount, markAsRead, markAllAsRead, deleteNotification, refetch } = useNotifications();
+  const { notifications, loading, unreadCount, markAsRead, markAllAsRead, deleteNotification, deleteAllRead, refetch } = useNotifications();
   const [markingAllRead, setMarkingAllRead] = useState(false);
+  const [deletingAllRead, setDeletingAllRead] = useState(false);
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
 
@@ -102,6 +103,16 @@ export function NotificationsInbox({ userId }: NotificationsInboxProps) {
     setMarkingAllRead(true);
     await markAllAsRead();
     setMarkingAllRead(false);
+  };
+
+  const handleDeleteAllRead = async () => {
+    setDeletingAllRead(true);
+    await deleteAllRead();
+    setDeletingAllRead(false);
+    toast({
+      title: "Notificações limpas",
+      description: "Todas as notificações lidas foram eliminadas.",
+    });
   };
 
   const handleNotificationClick = async (notification: Notification) => {
@@ -195,7 +206,7 @@ export function NotificationsInbox({ userId }: NotificationsInboxProps) {
     }
   };
 
-  const filteredNotifications = filter === "unread" 
+  const filteredNotifications = filter === "unread"
     ? notifications.filter(n => !n.is_read)
     : notifications;
 
@@ -234,21 +245,39 @@ export function NotificationsInbox({ userId }: NotificationsInboxProps) {
             </Badge>
           )}
         </div>
-        {unreadCount > 0 && (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleMarkAllAsRead}
-            disabled={markingAllRead}
-          >
-            {markingAllRead ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Check className="h-4 w-4 mr-2" />
-            )}
-            Marcar todas como lidas
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleMarkAllAsRead}
+              disabled={markingAllRead}
+            >
+              {markingAllRead ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
+              Marcar lidas
+            </Button>
+          )}
+          {notifications.some(n => n.is_read) && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDeleteAllRead}
+              disabled={deletingAllRead}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              {deletingAllRead ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Limpar lidas
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -280,9 +309,8 @@ export function NotificationsInbox({ userId }: NotificationsInboxProps) {
                 return (
                   <div
                     key={notification.id}
-                    className={`w-full p-4 transition-colors text-left group ${
-                      !notification.is_read ? "bg-primary/5 border-l-2 border-l-primary" : ""
-                    }`}
+                    className={`w-full p-4 transition-colors text-left group ${!notification.is_read ? "bg-primary/5 border-l-2 border-l-primary" : ""
+                      }`}
                   >
                     <button
                       onClick={() => !isBuyerVaultRequest && handleNotificationClick(notification)}
@@ -290,9 +318,8 @@ export function NotificationsInbox({ userId }: NotificationsInboxProps) {
                     >
                       <div className="flex items-start gap-4">
                         {/* Icon */}
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          !notification.is_read ? "bg-primary/10" : "bg-muted"
-                        }`}>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${!notification.is_read ? "bg-primary/10" : "bg-muted"
+                          }`}>
                           {notificationIcons[notification.type] || <Bell className="h-5 w-5" />}
                         </div>
 
@@ -320,9 +347,9 @@ export function NotificationsInbox({ userId }: NotificationsInboxProps) {
                               </span>
                             )}
                             <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(notification.created_at), { 
-                                addSuffix: true, 
-                                locale: pt 
+                              {formatDistanceToNow(new Date(notification.created_at), {
+                                addSuffix: true,
+                                locale: pt
                               })}
                             </span>
                           </div>

@@ -183,6 +183,22 @@ export function useNotifications() {
     }
   });
 
+  const deleteAllReadMutation = useMutation({
+    mutationFn: async () => {
+      if (!user) return;
+      const { error } = await (supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('is_read', true) as any);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications', user?.id] });
+    }
+  });
+
   useEffect(() => {
     if (!user?.id) return;
 
@@ -214,6 +230,7 @@ export function useNotifications() {
     markAsRead: (id: string) => markAsReadMutation.mutateAsync(id),
     markAllAsRead: () => markAllAsReadMutation.mutateAsync(),
     deleteNotification: (id: string) => deleteNotificationMutation.mutateAsync(id),
+    deleteAllRead: () => deleteAllReadMutation.mutateAsync(),
     refetch
   };
 }

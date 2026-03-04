@@ -143,23 +143,6 @@ export function AddProfessionalDialog({
 
       if (error) throw error;
 
-      // Fetch buyer name for notification
-      const { data: buyerProfile } = await supabase
-        .from("profiles")
-        .select("full_name, email")
-        .eq("id", user.id)
-        .single();
-      const buyerName = buyerProfile?.full_name || buyerProfile?.email?.split("@")[0] || "Um potencial comprador";
-
-      await supabase.from("notifications").insert({
-        user_id: ownerId,
-        property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
-        type: "buyer_vault_request",
-        title: "Pedido de acesso ao cofre!",
-        message: `${buyerName} solicitou acesso ao cofre digital do imóvel "${propertyTitle}".`,
-        metadata: { buyer_id: user.id, buyer_name: buyerName, request_type: "buyer_vault_access" },
-      });
-
       toast({
         title: "Pedido enviado!",
         description: "O proprietário será notificado. Após aprovação, poderá pagar o acesso por €10.",
@@ -228,50 +211,6 @@ export function AddProfessionalDialog({
         .insert(requests);
 
       if (error) throw error;
-
-      // Get property owner ID to send notification
-      const { data: property } = await supabase
-        .from("properties")
-        .select("user_id")
-        .eq("id", (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null)
-        .maybeSingle();
-
-      // Get selected professionals names for the notification
-      const selectedProfessionalNames = sortedProfessionals
-        ?.filter((p) => selectedProfessionals.includes(p.id))
-        .map((p) => p.name)
-        .join(", ");
-
-      // Create notification for property owner about professionals added to vault
-      if (property?.user_id) {
-        await supabase.from("notifications").insert({
-          user_id: property.user_id,
-          property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
-          type: "professional_added",
-          title: "Profissional adicionado ao cofre!",
-          message: `${selectedProfessionals.length} profissional(is) foi(ram) adicionado(s) ao cofre do imóvel "${propertyTitle}": ${selectedProfessionalNames}`,
-          metadata: {
-            professionals_count: selectedProfessionals.length,
-            professional_names: selectedProfessionalNames,
-            requester_id: user.id,
-          },
-        });
-      }
-
-      // Notify each selected professional about the new vault access request
-      for (const professionalId of selectedProfessionals) {
-        const prof = sortedProfessionals?.find(p => p.id === professionalId);
-        if (prof?.user_id) {
-          await supabase.from("notifications").insert({
-            user_id: prof.user_id,
-            property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
-            type: "new_vault_access_request",
-            title: "Novo pedido de acesso ao cofre!",
-            message: `Recebeu um pedido de acesso ao cofre digital do imóvel "${propertyTitle}".`,
-            metadata: { requester_id: user.id, property_id: propertyId },
-          });
-        }
-      }
 
       const totalCost = selectedProfessionals.length * 10;
 

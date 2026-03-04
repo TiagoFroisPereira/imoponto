@@ -115,24 +115,6 @@ export function RequestBuyerAccessDialog({
 
       if (error) throw error;
 
-      // Fetch buyer name for notification
-      const { data: buyerProfile } = await supabase
-        .from("profiles")
-        .select("full_name, email")
-        .eq("id", user.id)
-        .single();
-      const buyerName = buyerProfile?.full_name || buyerProfile?.email?.split("@")[0] || "Um potencial comprador";
-
-      // Notify the owner
-      await supabase.from("notifications").insert({
-        user_id: ownerId,
-        property_id: (propertyId && propertyId !== "null" && propertyId !== "none" && propertyId !== "service-request") ? propertyId : null,
-        type: "buyer_vault_request",
-        title: "Pedido de acesso ao cofre!",
-        message: `${buyerName} solicitou acesso ao cofre digital do imóvel "${propertyTitle}".`,
-        metadata: { buyer_id: user.id, buyer_name: buyerName, request_type: "buyer_vault_access" },
-      });
-
       toast({
         title: "Pedido enviado!",
         description: "O proprietário será notificado. Após aprovação, será solicitado o pagamento de €10.",

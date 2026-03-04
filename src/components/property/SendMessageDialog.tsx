@@ -124,19 +124,6 @@ export function SendMessageDialog({
       );
 
       if (result) {
-        // Create notification for seller
-        await supabase.from('notifications').insert({
-          user_id: sellerId,
-          property_id: (propertyId && propertyId !== "null" && propertyId !== "none") ? propertyId : null,
-          type: 'message',
-          title: 'Nova mensagem!',
-          message: `Recebeu uma nova mensagem sobre "${propertyTitle}"`,
-          metadata: {
-            sender_id: user.id,
-            preview: message.trim().substring(0, 100)
-          }
-        });
-
         toast({
           title: "Mensagem enviada!",
           description: "O vendedor irá receber a sua mensagem",

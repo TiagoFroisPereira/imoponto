@@ -122,26 +122,6 @@ export function BookVisitDialog({
 
       if (!result) throw new Error('Failed to send scheduling message');
 
-
-      // Create in-app notification for the seller
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: sellerId,
-          property_id: propertyId,
-          type: 'visit_booking',
-          title: selectedDate && selectedSlot ? 'Nova visita agendada!' : 'Solicitação de visita',
-          message: selectedDate && selectedSlot
-            ? `${name} agendou uma visita para "${propertyTitle}" no dia ${format(selectedDate, "d 'de' MMMM", { locale: pt })} às ${selectedSlot.time}.`
-            : `${name} solicitou um agendamento de visita para "${propertyTitle}".`,
-          metadata: {
-            visitor_name: name,
-            visitor_phone: phone,
-            visitor_email: email,
-            booking_id: bookingId
-          }
-        });
-
       if (selectedDate && selectedSlot) {
         toast({
           title: "Visita agendada com sucesso!",

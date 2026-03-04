@@ -263,9 +263,8 @@ export function NotificationBell() {
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => e.key === 'Enter' && handleNotificationClick(notification)}
-                    className={`w-full p-3 transition-colors text-left group ${
-                      isBuyerVaultRequest ? 'cursor-default' : 'hover:bg-muted/50 cursor-pointer'
-                    } ${!notification.is_read ? 'bg-primary/5' : ''}`}
+                    className={`w-full p-3 transition-colors text-left group ${isBuyerVaultRequest ? 'cursor-default' : 'hover:bg-muted/50 cursor-pointer'
+                      } ${!notification.is_read ? 'bg-primary/5' : ''}`}
                   >
                     <div className="flex gap-3">
                       <div className="flex-shrink-0 mt-0.5">
