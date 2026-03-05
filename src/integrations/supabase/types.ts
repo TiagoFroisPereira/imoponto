@@ -129,7 +129,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       conversations: {
@@ -172,7 +172,15 @@ export type Database = {
           seller_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "conversations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       email_queue: {
         Row: {
@@ -236,7 +244,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       messages: {
@@ -281,7 +289,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "view_conversation_details"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       notifications: {
@@ -325,7 +333,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       plans_addons: {
@@ -414,7 +422,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professional_events"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       professional_events: {
@@ -467,7 +475,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       professional_legal_acceptances: {
@@ -548,7 +556,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professionals_public"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       professional_relationships: {
@@ -606,7 +614,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       professional_reviews: {
@@ -651,7 +659,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professionals_public"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       professionals: {
@@ -742,6 +750,7 @@ export type Database = {
           subscription_current_period_end: string | null
           subscription_status: string | null
           updated_at: string
+          user_role_preference: string | null
         }
         Insert: {
           chat_enabled?: boolean | null
@@ -761,6 +770,7 @@ export type Database = {
           subscription_current_period_end?: string | null
           subscription_status?: string | null
           updated_at?: string
+          user_role_preference?: string | null
         }
         Update: {
           chat_enabled?: boolean | null
@@ -780,6 +790,7 @@ export type Database = {
           subscription_current_period_end?: string | null
           subscription_status?: string | null
           updated_at?: string
+          user_role_preference?: string | null
         }
         Relationships: []
       }
@@ -938,7 +949,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       property_proposals: {
@@ -991,7 +1002,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       sms_notifications: {
@@ -1144,7 +1155,21 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "professionals_public"
             referencedColumns: ["id"]
-          }
+          },
+          {
+            foreignKeyName: "vault_access_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vault_access_requests_vault_document_id_fkey"
+            columns: ["vault_document_id"]
+            isOneToOne: false
+            referencedRelation: "vault_documents"
+            referencedColumns: ["id"]
+          },
         ]
       }
       vault_buyer_access: {
@@ -1194,7 +1219,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       vault_consent_acceptances: {
@@ -1250,7 +1275,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       vault_documents: {
@@ -1306,7 +1331,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       visit_availability: {
@@ -1344,7 +1369,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       visit_bookings: {
@@ -1393,7 +1418,15 @@ export type Database = {
           visitor_name?: string
           visitor_phone?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "visit_bookings_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       waitlist_subscribers: {
         Row: {
@@ -1487,17 +1520,22 @@ export type Database = {
           is_archived_by_seller: boolean | null
           is_read_by_buyer: boolean | null
           is_read_by_seller: boolean | null
-          last_message: Json | null
           last_message_at: string | null
           property_id: string | null
           property_image: string | null
           property_title: string | null
           seller_id: string | null
-          unread_count_buyer: number | null
-          unread_count_seller: number | null
           updated_at: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "conversations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -1509,6 +1547,7 @@ export type Database = {
         Args: { setting_key: string; user_id: string }
         Returns: boolean
       }
+      delete_old_notifications: { Args: never; Returns: undefined }
       get_participant_event_ids: {
         Args: { check_user_id: string }
         Returns: string[]
@@ -1562,7 +1601,7 @@ export type Tables<
   }
   ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
     DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1590,7 +1629,7 @@ export type TablesInsert<
     schema: keyof DatabaseWithoutInternals
   }
   ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1615,7 +1654,7 @@ export type TablesUpdate<
     schema: keyof DatabaseWithoutInternals
   }
   ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1640,7 +1679,7 @@ export type Enums<
     schema: keyof DatabaseWithoutInternals
   }
   ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1657,7 +1696,7 @@ export type CompositeTypes<
     schema: keyof DatabaseWithoutInternals
   }
   ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

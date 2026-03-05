@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,6 +51,8 @@ export const RegisterForm = ({ registrationEnabled, onSuccess }: RegisterFormPro
     const { toast } = useToast();
     const navigate = useNavigate();
     const { signUp } = useAuth();
+    const [searchParams] = useSearchParams();
+    const roleParam = searchParams.get("role") as "buyer" | "seller" | null;
 
     const handleProfessionalChange = (checked: boolean) => {
         if (checked) {
@@ -136,7 +138,10 @@ export const RegisterForm = ({ registrationEnabled, onSuccess }: RegisterFormPro
 
         setIsLoading(true);
 
-        const { data, error } = await signUp(email, password, name);
+        const storedIntent = localStorage.getItem('imoponto_user_intent') as "buyer" | "seller" | null;
+        const finalRole = roleParam || storedIntent;
+
+        const { data, error } = await signUp(email, password, name, finalRole || undefined);
 
         if (error) {
             setIsLoading(false);

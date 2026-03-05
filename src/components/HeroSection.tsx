@@ -56,7 +56,11 @@ const HeroSection = () => {
               size="xl"
               className="text-base md:text-xl px-8 md:px-12 h-14 md:h-20 shadow-2xl shadow-accent/30 hover:shadow-accent/40 hover:-translate-y-1 transition-all duration-300 w-full sm:w-auto font-black"
             >
-              <Link to="/sem-comissoes" className="flex items-center">
+              <Link
+                to="/sem-comissoes"
+                className="flex items-center"
+                onClick={() => localStorage.setItem('imoponto_user_intent', 'seller')}
+              >
                 <HomeIcon className="w-5 h-5 mr-2 md:mr-3" />
                 Vender sem Comissões
               </Link>
@@ -69,7 +73,11 @@ const HeroSection = () => {
                 size="xl"
                 className="text-base md:text-xl px-8 md:px-12 h-14 md:h-20 hover:bg-white/5 transition-all duration-300 w-full sm:w-auto border-2 border-white/10 font-bold backdrop-blur-sm"
               >
-                <Link to="/imoveis" className="flex items-center">
+                <Link
+                  to="/imoveis"
+                  className="flex items-center"
+                  onClick={() => localStorage.setItem('imoponto_user_intent', 'buyer')}
+                >
                   <Search className="w-5 h-5 mr-2 md:mr-3" />
                   <span>Explorar Imóveis</span>
                 </Link>

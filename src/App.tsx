@@ -58,6 +58,7 @@ import Canceled from "./pages/payment/Canceled";
 import { MessagingProvider } from "./contexts/MessagingContext";
 import { AuthModalProvider } from "./contexts/AuthModalContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { UserSegmentationDialog } from "./components/auth/UserSegmentationDialog";
 import { Analytics } from "@vercel/analytics/react"
 
 const queryClient = new QueryClient({
@@ -80,6 +81,7 @@ const App = () => (
           <AuthModalProvider>
             <MessagingProvider>
               <LegalAcceptanceWrapper>
+                <UserSegmentationDialog />
                 <ScrollToTop />
                 <Toaster />
                 <Sonner />

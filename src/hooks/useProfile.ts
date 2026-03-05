@@ -14,6 +14,7 @@ export interface Profile {
   plan_type: string | null;
   premium_until: string | null;
   notification_settings?: Record<string, boolean>;
+  user_role_preference?: 'buyer' | 'seller' | null;
   created_at: string;
   updated_at: string;
   plan?: string | null;
