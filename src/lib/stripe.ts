@@ -21,7 +21,14 @@ export async function createCheckoutSession(params: CreateCheckoutParams) {
 
         if (error) throw error;
 
-        return data as { url: string; sessionId: string };
+        const result = data as { url: string; sessionId: string };
+
+        // Automatically redirect to Stripe if URL is present
+        if (result.url) {
+            window.location.href = result.url;
+        }
+
+        return result;
     } catch (error) {
         console.error('Error creating checkout session:', error);
         throw error;
@@ -39,50 +46,32 @@ export const STRIPE_PRICES = {
 export async function subscribeToPlan(planType: 'start' | 'pro', billingPeriod: 'monthly' | 'yearly') {
     // We now pass the productKey and billingPeriod
     // The edge function will use this to pick the correct Stripe Price ID
-    const result = await createCheckoutSession({
+    return createCheckoutSession({
         mode: 'subscription',
         productKey: planType,
         billingPeriod,
         successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
         cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
     });
-
-    if (result.url) {
-        window.location.href = result.url;
-    }
-
-    return result;
 }
 
 export async function purchaseVaultAccess(vaultRequestId: string) {
-    const result = await createCheckoutSession({
+    return createCheckoutSession({
         mode: 'payment',
         vaultRequestId,
         successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
         cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
     });
-
-    // Redirect to Stripe Checkout
-    if (result.url) {
-        window.location.href = result.url;
-    }
-
-    return result;
 }
 
 export async function purchaseAddon(propertyId: string, addonKey: string) {
-    const result = await createCheckoutSession({
+    return createCheckoutSession({
         mode: 'payment',
         productKey: addonKey,
+        propertyId,
         successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
         cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
     });
-
-    if (result.url) {
-        window.location.href = result.url;
-    }
-
-    return result;
 }
 
 export async function createPortalSession() {

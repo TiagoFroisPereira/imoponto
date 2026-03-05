@@ -95,6 +95,8 @@ export function QuickCheckoutDialog({
                 productKey: product.key,
                 propertyId: finalPropertyId,
                 quantity: quantity,
+                successUrl: `${window.location.origin}/pagamentos/sucesso?session_id={CHECKOUT_SESSION_ID}&from=${encodeURIComponent(window.location.pathname + window.location.search)}`,
+                cancelUrl: `${window.location.origin}/pagamentos/cancelado?retry_url=${encodeURIComponent(window.location.pathname + window.location.search)}`,
                 metadata: {
                     ...metadata,
                     propertyId: finalPropertyId,

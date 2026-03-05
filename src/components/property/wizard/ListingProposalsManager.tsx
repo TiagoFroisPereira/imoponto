@@ -16,7 +16,8 @@ import {
     Plus,
     Mail,
     User,
-    Clock
+    Clock,
+    Sparkles
 } from "lucide-react";
 import { ProposalsManager } from "./ProposalsManager";
 import { MessagesInbox } from "@/components/profile/MessagesInbox";
@@ -24,6 +25,11 @@ import { VisitAgendaManager } from "@/components/profile/VisitAgendaManager";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { UpsellCard } from "./UpsellCard";
+import { WIZARD_STEPS } from "./WizardConstants";
+import { VisibilitySelectionModal } from "./VisibilitySelectionModal";
+import { QuickCheckoutDialog } from "../../checkout/QuickCheckoutDialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface ListingProposalsManagerProps {
     propertyId: string;
@@ -43,7 +49,12 @@ export function ListingProposalsManager({
     onUpdateStatus
 }: ListingProposalsManagerProps) {
     const navigate = useNavigate();
+    const { toast } = useToast();
     const [activeTab, setActiveTab] = useState("proposals");
+    const [visibilityModalOpen, setVisibilityModalOpen] = useState(false);
+    const [checkoutOpen, setCheckoutOpen] = useState(false);
+    const [selectedProductKey, setSelectedProductKey] = useState("visibility_15");
+
     const isPublished = status === "active";
 
     const { data: user } = useQuery({
@@ -76,6 +87,25 @@ export function ListingProposalsManager({
                 </TabsList>
 
                 <TabsContent value="proposals" className="space-y-4 pt-2 mt-0 border-none outline-none ring-0">
+                    {WIZARD_STEPS[1].upsell && (
+                        <UpsellCard
+                            title={WIZARD_STEPS[1].upsell.title}
+                            description={WIZARD_STEPS[1].upsell.description}
+                            price={WIZARD_STEPS[1].upsell.price}
+                            buttonLabel={WIZARD_STEPS[1].upsell.buttonLabel}
+                            secondaryButtonLabel={WIZARD_STEPS[1].upsell.secondaryButtonLabel}
+                            badge={WIZARD_STEPS[1].upsell.badge}
+                            variant={WIZARD_STEPS[1].upsell.variant}
+                            onClick={() => setVisibilityModalOpen(true)}
+                            onSecondaryClick={() => {
+                                toast({
+                                    title: "Visibilidade Atual",
+                                    description: "O seu anúncio está visível, mas a concorrência é alta. Considere destacar para resultados mais rápidos.",
+                                });
+                            }}
+                            className="bg-blue-50/50 border-blue-100 mb-6"
+                        />
+                    )}
                     <ProposalsManager
                         propertyId={propertyId}
                         propertyPrice={propertyPrice}
@@ -154,6 +184,30 @@ export function ListingProposalsManager({
                     )}
                 </TabsContent>
             </Tabs>
+
+            <VisibilitySelectionModal
+                open={visibilityModalOpen}
+                onOpenChange={setVisibilityModalOpen}
+                onSelect={(option) => {
+                    setSelectedProductKey(option.key);
+                    setVisibilityModalOpen(false);
+                    setCheckoutOpen(true);
+                }}
+            />
+
+            <QuickCheckoutDialog
+                open={checkoutOpen}
+                onOpenChange={setCheckoutOpen}
+                productKey={selectedProductKey}
+                propertyId={propertyId}
+                onSuccess={() => {
+                    onUpdateStatus();
+                    toast({
+                        title: "Destaque Ativado!",
+                        description: "O seu imóvel está agora no topo dos resultados.",
+                    });
+                }}
+            />
         </div>
     );
 }

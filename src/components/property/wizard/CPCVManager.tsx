@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { UpsellCard } from "./UpsellCard";
+import { WIZARD_STEPS } from "./WizardConstants";
+import { LeadMatchingBridge } from "./LeadMatchingBridge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -143,8 +147,10 @@ const categoryLabels: Record<ServiceCategory, string> = {
 };
 
 export function CPCVManager({ propertyId, onOpenVault }: CPCVManagerProps) {
+    const navigate = useNavigate();
     const [expandedSection, setExpandedSection] = useState<string>("disclaimer");
     const [searchModalOpen, setSearchModalOpen] = useState(false);
+    const [leadMatchingOpen, setLeadMatchingOpen] = useState(false);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
     const [selectedProfessional, setSelectedProfessional] = useState<ProfessionalWithReviews | null>(null);
     const [contactDialogOpen, setContactDialogOpen] = useState(false);
@@ -372,6 +378,22 @@ export function CPCVManager({ propertyId, onOpenVault }: CPCVManagerProps) {
                         </DialogDescription>
                     </DialogHeader>
 
+                    {/* Upsell to Professional Review */}
+                    {WIZARD_STEPS[2].upsell && (
+                        <UpsellCard
+                            title={WIZARD_STEPS[2].upsell.title}
+                            description={WIZARD_STEPS[2].upsell.description}
+                            price={WIZARD_STEPS[2].upsell.price}
+                            buttonLabel={WIZARD_STEPS[2].upsell.buttonLabel}
+                            secondaryButtonLabel={WIZARD_STEPS[2].upsell.secondaryButtonLabel}
+                            variant={WIZARD_STEPS[2].upsell.variant}
+                            badge={WIZARD_STEPS[2].upsell.badge}
+                            onClick={() => setLeadMatchingOpen(true)}
+                            className="mb-6"
+                        />
+                    )}
+
+                    {/* Professional Search */}
                     <div className="space-y-4">
                         {/* Search Input */}
                         <div className="relative">
@@ -669,15 +691,12 @@ export function CPCVManager({ propertyId, onOpenVault }: CPCVManagerProps) {
             </Dialog >
 
             {/* Contact Dialog */}
-            {
-                selectedProfessional && (
-                    <ContactDialog
-                        open={contactDialogOpen}
-                        onOpenChange={setContactDialogOpen}
-                        professional={selectedProfessional}
-                    />
-                )
-            }
+
+            <LeadMatchingBridge
+                open={leadMatchingOpen}
+                onOpenChange={setLeadMatchingOpen}
+                propertyId={propertyId}
+            />
         </div >
     );
 }

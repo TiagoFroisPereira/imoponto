@@ -72,3 +72,13 @@ Example of how even "boring" pages are treated with premium care.
 
 ## 🏁 Audit Conclusion
 The application is **visually stunning** and functionally solid. It successfully achieves the "WOW factor" requested. The identified issues are minor polish points (mostly related to placeholder links and small input behaviors) that do not detract from the overall premium feel but should be fixed for a "finished" product feel.
+
+---
+
+## 🛠️ Technical Enhancements: Stripe & Persistence
+
+### 💳 Stripe Checkout & Webhooks
+- **Generic Architecture**: The `stripe-webhook` has been refactored to be **data-driven**, using the `plans_addons` table to handle subscriptions and one-time payments (addons) generically.
+- **Improved UX**: Automated redirects from the backend to Stripe Checkout ensure a seamless user experience, avoiding redundant "loading" states.
+- **Data Persistence**: Successful payments for property addons (Extra Photos, Video, etc.) are now correctly persisted in the `property_addons` table.
+- **Unified Confirmations**: A centralized email system now sends consistent payment receipts with human-readable service names fetched directly from the database.

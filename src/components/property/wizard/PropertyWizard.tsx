@@ -29,6 +29,7 @@ import { EscrituraManager } from "./EscrituraManager";
 import { PostEscrituraManager } from "./PostEscrituraManager";
 import { ListingProposalsManager } from "./ListingProposalsManager";
 import { DocumentStatusItem } from "./DocumentStatusItem";
+import { UpsellCard } from "./UpsellCard";
 
 interface PropertyWizardProps {
     propertyId: string;

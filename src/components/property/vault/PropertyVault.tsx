@@ -17,7 +17,12 @@ import { AddProfessionalDialog } from "../AddProfessionalDialog";
 import { VaultSharedUsers } from "./VaultSharedUsers";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { WIZARD_STEPS } from "../wizard/WizardConstants";
+import { UpsellCard } from "../wizard/UpsellCard";
 import { supabase } from "@/integrations/supabase/client";
+import { QuickCheckoutDialog } from "../../checkout/QuickCheckoutDialog";
 
 interface PropertyVaultProps {
   propertyId: string;
@@ -29,14 +34,15 @@ export function PropertyVault({ propertyId, propertyTitle }: PropertyVaultProps)
   const { hasConsent, isLoading: consentLoading } = useVaultConsent(propertyId);
   const vm = useVaultManager(propertyId, propertyTitle);
   const [addProfessionalOpen, setAddProfessionalOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { user } = useAuth();
 
-  const { data: property } = useQuery({
+  const { data: property, refetch: refetchProperty } = useQuery({
     queryKey: ['property-owner', propertyId],
     queryFn: async () => {
       const { data } = await supabase
         .from('properties')
-        .select('user_id')
+        .select('user_id, location')
         .eq('id', propertyId)
         .maybeSingle();
       return data;
@@ -67,6 +73,7 @@ export function PropertyVault({ propertyId, propertyTitle }: PropertyVaultProps)
   const showPaywall = !limitsLoading && !buyerAccessLoading && !hasFeature('vault') && !hasBuyerPaidAccess;
   // Buyers with paid access already accepted terms during payment, skip consent
   const needsConsent = !consentLoading && (hasFeature('vault') || hasBuyerPaidAccess) && !hasConsent && !hasBuyerPaidAccess;
+  const navigate = useNavigate();
 
   const otherCategory = DOCUMENT_CATEGORIES.find(c => c.value === 'outros')!;
   const otherDocs = vm.documents.filter(d => d.category === 'outros');
@@ -103,6 +110,28 @@ export function PropertyVault({ propertyId, propertyTitle }: PropertyVaultProps)
         {/* Main content */}
         {!isAnyLoading && (
           <div className={`p-6 space-y-6 transition-all duration-700 ${showPaywall || needsConsent ? "blur-md pointer-events-none opacity-40 select-none scale-[0.98]" : "opacity-100 scale-100"}`}>
+            {isOwner && WIZARD_STEPS[0].upsell && (
+              <UpsellCard
+                title={vm.documents.length >= 4 ? "⚠️ Limite atingido no Cofre Básico" : WIZARD_STEPS[0].upsell.title}
+                description={vm.documents.length >= 4
+                  ? "Atingiu o limite de 4 ficheiros do modo básico. Ative o Cofre Premium para validar documentos ilimitados e garantir a segurança da venda."
+                  : WIZARD_STEPS[0].upsell.description}
+                price={WIZARD_STEPS[0].upsell.price}
+                buttonLabel={WIZARD_STEPS[0].upsell.buttonLabel}
+                secondaryButtonLabel={vm.documents.length >= 4 ? undefined : WIZARD_STEPS[0].upsell.secondaryButtonLabel}
+                variant={vm.documents.length >= 4 ? "accent" : WIZARD_STEPS[0].upsell.variant}
+                badge={vm.documents.length >= 4 ? "Urgente" : WIZARD_STEPS[0].upsell.badge}
+                onClick={() => setCheckoutOpen(true)}
+                onSecondaryClick={() => {
+                  if (property?.location) {
+                    navigate(`/pesquisa?category=fotografo&location=${encodeURIComponent(property.location)}`);
+                  } else {
+                    navigate('/pesquisa?category=fotografo');
+                  }
+                }}
+                className={cn("mb-2", vm.documents.length >= 4 && "border-amber-300 bg-amber-50/30")}
+              />
+            )}
             <VaultHeader
               documentsCount={vm.documents.length}
               onDownloadAll={vm.handleDownloadAll}
@@ -234,6 +263,14 @@ export function PropertyVault({ propertyId, propertyTitle }: PropertyVaultProps)
           vaultDocumentIds={vm.documents.map(d => d.id)}
         />
       </div>
+
+      <QuickCheckoutDialog
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        productKey="vault_premium"
+        propertyId={propertyId}
+        onSuccess={() => refetchProperty()}
+      />
     </div>
   );
 }

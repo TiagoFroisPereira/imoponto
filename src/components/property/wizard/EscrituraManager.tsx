@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { UpsellCard } from "./UpsellCard";
+import { WIZARD_STEPS } from "./WizardConstants";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +23,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { NotaryBookingInterface } from "./NotaryBookingInterface";
+import { useToast } from "@/hooks/use-toast";
 import {
     CheckCircle,
     XCircle,
@@ -88,8 +93,11 @@ const categoryLabels: Record<ServiceCategory, string> = {
 };
 
 export function EscrituraManager({ propertyId, onOpenVault }: EscrituraManagerProps) {
+    const navigate = useNavigate();
     const [searchModalOpen, setSearchModalOpen] = useState(false);
+    const [bookingOpen, setBookingOpen] = useState(false);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
+    const { toast } = useToast();
     const [selectedProfessional, setSelectedProfessional] = useState<ProfessionalWithReviews | null>(null);
     const [contactDialogOpen, setContactDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -256,7 +264,7 @@ export function EscrituraManager({ propertyId, onOpenVault }: EscrituraManagerPr
                                     variant="outline"
                                     size="sm"
                                     className="w-full mt-2"
-                                    onClick={onOpenVault}
+                                    onClick={() => navigate('/vault')}
                                 >
                                     <FileText className="w-4 h-4 mr-2" />
                                     Ir para Cofre Digital
@@ -266,6 +274,27 @@ export function EscrituraManager({ propertyId, onOpenVault }: EscrituraManagerPr
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
+
+            {/* Upsell Section */}
+            {WIZARD_STEPS[3].upsell && (
+                <UpsellCard
+                    title={WIZARD_STEPS[3].upsell.title}
+                    description={WIZARD_STEPS[3].upsell.description}
+                    price={WIZARD_STEPS[3].upsell.price}
+                    buttonLabel={WIZARD_STEPS[3].upsell.buttonLabel}
+                    secondaryButtonLabel={WIZARD_STEPS[3].upsell.secondaryButtonLabel}
+                    variant={WIZARD_STEPS[3].upsell.variant}
+                    badge={WIZARD_STEPS[3].upsell.badge}
+                    onClick={() => setBookingOpen(true)}
+                    onSecondaryClick={() => {
+                        toast({
+                            title: "Agendamento Manual",
+                            description: "Pode agendar num cartório da sua preferência. Lembre-se de partilhar o link do Cofre.",
+                        });
+                    }}
+                    className="mb-6"
+                />
+            )}
 
             {/* Professional Access */}
             <div className="border rounded-lg bg-card">
@@ -554,6 +583,12 @@ export function EscrituraManager({ propertyId, onOpenVault }: EscrituraManagerPr
                     professional={selectedProfessional}
                 />
             )}
+
+            <NotaryBookingInterface
+                open={bookingOpen}
+                onOpenChange={setBookingOpen}
+                propertyId={propertyId}
+            />
         </div>
     );
 }

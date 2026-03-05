@@ -19,6 +19,15 @@ export interface WizardStep {
         componentId?: string;
         targetUrl?: string;
     };
+    upsell?: {
+        title: string;
+        description: string;
+        badge?: string;
+        price?: string;
+        buttonLabel: string;
+        secondaryButtonLabel?: string;
+        variant: 'default' | 'premium' | 'accent';
+    };
 }
 
 export const WIZARD_STEPS: Record<number, WizardStep> = {
@@ -41,6 +50,15 @@ export const WIZARD_STEPS: Record<number, WizardStep> = {
             buttonLabel: "Abrir Cofre",
             actionType: 'modal',
             componentId: 'vault'
+        },
+        upsell: {
+            title: "🛡️ Venda com a segurança de um profissional",
+            description: "Organizar a papelada é a parte mais crítica. Com o Cofre Digital Premium, validamos a sua documentação e criamos um ambiente seguro para partilha. Evite atrasos na escritura por falta de documentos.",
+            badge: "Mais Popular",
+            price: "€39",
+            buttonLabel: "Ativar Cofre Premium (€39)",
+            secondaryButtonLabel: "Continuar com o modo básico (limite de 4 ficheiros)",
+            variant: "premium"
         }
     },
     1: {
@@ -57,6 +75,14 @@ export const WIZARD_STEPS: Record<number, WizardStep> = {
             buttonLabel: "Gestão de Anúncio",
             actionType: 'inline',
             componentId: 'listing-proposals'
+        },
+        upsell: {
+            title: "🚀 Não deixe a sua casa perder-se no fundo da lista",
+            description: "Sabia que os anúncios com Destaque Premium recebem, em média, 4x mais propostas na primeira semana? Coloque o seu imóvel no topo das pesquisas na sua cidade.",
+            price: "€14,90",
+            buttonLabel: "Destacar agora (€14,90)",
+            secondaryButtonLabel: "Ver estatísticas do anúncio",
+            variant: "accent"
         }
     },
     2: {
@@ -78,6 +104,13 @@ export const WIZARD_STEPS: Record<number, WizardStep> = {
             buttonLabel: "Preparar CPCV",
             actionType: 'inline',
             componentId: 'cpcv'
+        },
+        upsell: {
+            title: "⚖️ Proteja o seu sinal (e o seu sono)",
+            description: "Um erro no Contrato Promessa pode custar-lhe o sinal em dobro. Temos Solicitadores e Advogados prontos para rever a sua minuta e garantir que nada fica esquecido.",
+            price: "Lead Grátis p/ Vendedor*",
+            buttonLabel: "Solicitar Revisão Jurídica",
+            variant: "default"
         }
     },
     3: {
@@ -99,7 +132,15 @@ export const WIZARD_STEPS: Record<number, WizardStep> = {
             "Verifique se o comprador tem o financiamento aprovado.",
             "Confirme data e hora com o Cartório/Notário."
         ],
-        requiredDocuments: ['impostos']
+        requiredDocuments: ['impostos'],
+        upsell: {
+            title: "🏠 Escritura sem filas nem complicações",
+            description: "Já tem data? Facilitamos o agendamento no Cartório ou Notário mais próximo de si. Enviamos toda a documentação do seu Cofre Digital diretamente para eles.",
+            price: "Parceiros Oficiais",
+            buttonLabel: "Agendar Escritura com Parceiro",
+            secondaryButtonLabel: "Vou agendar por conta própria",
+            variant: "default"
+        }
     },
     4: {
         id: 4,
@@ -120,7 +161,15 @@ export const WIZARD_STEPS: Record<number, WizardStep> = {
             "Arquive a cópia da escritura no Cofre Digital.",
             "Certifique-se que o distrate de hipoteca foi processado.",
             "Cancele contratos de serviços associados ao imóvel."
-        ]
+        ],
+        upsell: {
+            title: "📂 O seu histórico imobiliário, sempre à mão",
+            description: "Parabéns pela venda! Deseja manter o seu Cofre Vitalício? Por apenas €10/ano, garantimos que a sua escritura e distrates estão guardados e acessíveis para as suas futuras declarações de IRS.",
+            price: "€10/ano",
+            buttonLabel: "Manter Cofre Vitalício (€10/ano)",
+            secondaryButtonLabel: "Encerrar e descarregar documentos",
+            variant: "premium"
+        }
     },
     5: {
         id: 5,

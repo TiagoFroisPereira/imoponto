@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { UpsellCard } from "./UpsellCard";
+import { WIZARD_STEPS } from "./WizardConstants";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +48,8 @@ import { getCategoryLabel } from "@/data/documentCategories";
 import { useProfessionalsWithReviews, type ProfessionalWithReviews, type ServiceCategory } from "@/hooks/useProfessionals";
 import { ContactDialog } from "@/components/services/ContactDialog";
 import { StarRating } from "@/components/services/StarRating";
+import { QuickCheckoutDialog } from "@/components/checkout/QuickCheckoutDialog";
+import { useToast } from "@/hooks/use-toast";
 import { DocumentStatusItem } from "./DocumentStatusItem";
 import { cn } from "@/lib/utils";
 
@@ -79,11 +84,14 @@ const categoryLabels: Record<ServiceCategory, string> = {
 };
 
 export function PostEscrituraManager({ propertyId, onOpenVault, onComplete }: PostEscrituraManagerProps) {
+    const navigate = useNavigate();
     const [searchModalOpen, setSearchModalOpen] = useState(false);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
     const [selectedProfessional, setSelectedProfessional] = useState<ProfessionalWithReviews | null>(null);
     const [contactDialogOpen, setContactDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [checkoutOpen, setCheckoutOpen] = useState(false);
+    const { toast } = useToast();
 
     // Fetch documents to check status
     const { data: documents = [] } = useQuery({
@@ -189,202 +197,255 @@ export function PostEscrituraManager({ propertyId, onOpenVault, onComplete }: Po
                 </div>
             </div>
 
-            {/* Services Section */}
-            <div className="border rounded-lg bg-card">
-                <div className="p-4 border-b bg-muted/30">
-                    <div className="flex items-center gap-2">
-                        <Users className="w-5 h-5 text-primary" />
-                        <h3 className="font-semibold text-base">Apoio Administrativo</h3>
+            {/* Upsell for Archive */}
+            {WIZARD_STEPS[4].upsell && (
+                <UpsellCard
+                    title={WIZARD_STEPS[4].upsell.title}
+                    description={WIZARD_STEPS[4].upsell.description}
+                    price={WIZARD_STEPS[4].upsell.price}
+                    buttonLabel={WIZARD_STEPS[4].upsell.buttonLabel}
+                    secondaryButtonLabel={WIZARD_STEPS[4].upsell.secondaryButtonLabel}
+                    variant={WIZARD_STEPS[4].upsell.variant}
+                    onClick={() => navigate('/planos')}
+                    onSecondaryClick={() => {
+                        // For Step 4, "Encerrar e descarregar documentos"
+                        console.log("Encerrar e descarregar clicked");
+                        // Mock descarregar
+                        window.alert("Documentos preparados para download. O processo será encerrado.");
+                    }}
+                    className="mb-6"
+                />
+            )}
+
+            {/* Support Services Section */}
+            <div className="space-y-4">
+                <div className="border rounded-lg bg-card">
+                    <div className="p-4 border-b bg-muted/30">
+                        <div className="flex items-center gap-2">
+                            <Users className="w-5 h-5 text-primary" />
+                            <h3 className="font-semibold text-base">Apoio Administrativo</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">
+                            Profissionais para ajudar na regularização e arquivo
+                        </p>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        Profissionais para ajudar na regularização e arquivo
+
+                    <div className="p-4">
+                        <Alert className="mb-4 border-blue-100 bg-blue-50/50">
+                            <Info className="h-4 w-4 text-blue-600" />
+                            <AlertDescription className="text-blue-800 text-xs">
+                                Pode necessitar de apoio para regularizar registos pendentes ou gerir a
+                                transição de serviços. O contacto é sempre iniciado por si.
+                            </AlertDescription>
+                        </Alert>
+
+                        <Button
+                            variant="default"
+                            className="w-full"
+                            onClick={() => setSearchModalOpen(true)}
+                        >
+                            <Search className="w-4 h-4 mr-2" />
+                            Procurar Apoio Pós-Venda
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Final Action */}
+                <div className="pt-4">
+                    <Button
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 h-12 text-base font-semibold"
+                        onClick={onComplete}
+                    >
+                        <CheckCircle className="w-5 h-5 mr-2" />
+                        Concluir e Finalizar Processo
+                    </Button>
+                    <p className="text-[10px] text-center text-muted-foreground mt-2">
+                        Ao finalizar, o imóvel será marcado como "Vendido" e o histórico será arquivado.
                     </p>
                 </div>
 
-                <div className="p-4">
-                    <Alert className="mb-4 border-blue-100 bg-blue-50/50">
-                        <Info className="h-4 w-4 text-blue-600" />
-                        <AlertDescription className="text-blue-800 text-xs">
-                            Pode necessitar de apoio para regularizar registos pendentes ou gerir a
-                            transição de serviços. O contacto é sempre iniciado por si.
-                        </AlertDescription>
-                    </Alert>
+                {/* Search Modal */}
+                <Dialog open={searchModalOpen} onOpenChange={setSearchModalOpen}>
+                    <DialogContent className="max-w-2xl max-h-[80vh]">
+                        <DialogHeader>
+                            <DialogTitle>Apoio Administrativo e Jurídico</DialogTitle>
+                            <DialogDescription>
+                                Encontre ajuda para tarefas pós-venda e regularização
+                            </DialogDescription>
+                        </DialogHeader>
 
-                    <Button
-                        variant="default"
-                        className="w-full"
-                        onClick={() => setSearchModalOpen(true)}
-                    >
-                        <Search className="w-4 h-4 mr-2" />
-                        Procurar Apoio Pós-Venda
-                    </Button>
-                </div>
-            </div>
+                        <div className="space-y-4">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Ex: Regularização, Solicitador, Administrativo..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
 
-            {/* Final Action */}
-            <div className="pt-4">
-                <Button
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 h-12 text-base font-semibold"
-                    onClick={onComplete}
-                >
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    Concluir e Finalizar Processo
-                </Button>
-                <p className="text-[10px] text-center text-muted-foreground mt-2">
-                    Ao finalizar, o imóvel será marcado como "Vendido" e o histórico será arquivado.
-                </p>
-            </div>
-
-            {/* Search Modal */}
-            <Dialog open={searchModalOpen} onOpenChange={setSearchModalOpen}>
-                <DialogContent className="max-w-2xl max-h-[80vh]">
-                    <DialogHeader>
-                        <DialogTitle>Apoio Administrativo e Jurídico</DialogTitle>
-                        <DialogDescription>
-                            Encontre ajuda para tarefas pós-venda e regularização
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <div className="space-y-4">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Ex: Regularização, Solicitador, Administrativo..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="pl-10"
-                            />
-                        </div>
-
-                        <ScrollArea className="h-[400px] pr-4">
-                            {loadingProfessionals ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                                </div>
-                            ) : filteredProfessionals.length > 0 ? (
-                                <div className="space-y-3">
-                                    {filteredProfessionals.map((professional) => {
-                                        const initials = professional.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
-                                        return (
-                                            <Card key={professional.id} className="hover:shadow-md transition-shadow">
-                                                <CardContent className="p-4">
-                                                    <div className="flex items-start gap-4">
-                                                        <Avatar className="w-12 h-12 border-2 border-accent/20">
-                                                            <AvatarImage src={professional.avatar_url || undefined} />
-                                                            <AvatarFallback className="bg-accent/10 text-accent">{initials}</AvatarFallback>
-                                                        </Avatar>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center gap-2 mb-1">
-                                                                <h4 className="font-semibold truncate">{professional.name}</h4>
-                                                                {professional.is_verified && <BadgeCheck className="w-4 h-4 text-accent flex-shrink-0" />}
-                                                            </div>
-                                                            <p className="text-sm text-muted-foreground mb-2">{professional.service_type}</p>
-                                                            <div className="flex items-center gap-2 mb-2">
-                                                                <StarRating rating={professional.averageRating} size="sm" />
-                                                                <span className="text-xs text-muted-foreground">({professional.totalReviews})</span>
-                                                            </div>
-                                                            <div className="flex gap-2">
-                                                                <Button variant="outline" size="sm" onClick={() => handleViewProfile(professional)}>Ver Perfil</Button>
-                                                                <Button variant="default" size="sm" onClick={() => handleContact(professional)}>Contactar</Button>
+                            <ScrollArea className="h-[400px] pr-4">
+                                {loadingProfessionals ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                    </div>
+                                ) : filteredProfessionals.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {filteredProfessionals.map((professional) => {
+                                            const initials = professional.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
+                                            return (
+                                                <Card key={professional.id} className="hover:shadow-md transition-shadow">
+                                                    <CardContent className="p-4">
+                                                        <div className="flex items-start gap-4">
+                                                            <Avatar className="w-12 h-12 border-2 border-accent/20">
+                                                                <AvatarImage src={professional.avatar_url || undefined} />
+                                                                <AvatarFallback className="bg-accent/10 text-accent">{initials}</AvatarFallback>
+                                                            </Avatar>
+                                                            <div className="flex-1 min-w-0">
+                                                                <div className="flex items-center gap-2 mb-1">
+                                                                    <h4 className="font-semibold truncate">{professional.name}</h4>
+                                                                    {professional.is_verified && <BadgeCheck className="w-4 h-4 text-accent flex-shrink-0" />}
+                                                                </div>
+                                                                <p className="text-sm text-muted-foreground mb-2">{professional.service_type}</p>
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <StarRating rating={professional.averageRating} size="sm" />
+                                                                    <span className="text-xs text-muted-foreground">({professional.totalReviews})</span>
+                                                                </div>
+                                                                <div className="flex gap-2">
+                                                                    <Button variant="outline" size="sm" onClick={() => handleViewProfile(professional)}>Ver Perfil</Button>
+                                                                    <Button variant="default" size="sm" onClick={() => handleContact(professional)}>Contactar</Button>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        );
-                                    })}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 text-muted-foreground">
-                                    <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                    <p className="text-sm">Nenhum profissional encontrado</p>
-                                </div>
-                            )}
-                        </ScrollArea>
-                    </div>
-                </DialogContent>
-            </Dialog>
+                                                    </CardContent>
+                                                </Card>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12 text-muted-foreground">
+                                        <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                                        <p className="text-sm">Nenhum profissional encontrado</p>
+                                    </div>
+                                )}
+                            </ScrollArea>
 
-            {/* Profile Modal */}
-            <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
-                <DialogContent className="max-w-3xl max-h-[85vh]">
-                    {selectedProfessional && (
-                        <>
-                            <DialogHeader>
-                                <DialogTitle className="sr-only">Perfil do Profissional</DialogTitle>
-                            </DialogHeader>
-                            <ScrollArea className="h-[calc(85vh-80px)] pr-4">
-                                <div className="space-y-6">
-                                    <div className="flex flex-col sm:flex-row gap-4">
-                                        <Avatar className="w-20 h-20 border-4 border-accent/20">
-                                            <AvatarImage src={selectedProfessional.avatar_url || undefined} />
-                                            <AvatarFallback className="text-2xl bg-accent/10 text-accent">
-                                                {selectedProfessional.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1">
-                                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                                                <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">Profissional Independente</Badge>
-                                                {selectedProfessional.is_verified && (
-                                                    <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
-                                                        <Shield className="w-3 h-3 mr-1" />Verificado
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                            <h2 className="text-2xl font-bold mb-2">{selectedProfessional.name}</h2>
-                                            <div className="flex flex-wrap items-center gap-3 text-muted-foreground mb-3">
-                                                <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" />{categoryLabels[selectedProfessional.category as ServiceCategory]}</span>
-                                                <span>•</span>
-                                                <span>{selectedProfessional.service_type}</span>
-                                            </div>
-                                            <div className="flex items-center gap-3">
-                                                <StarRating rating={selectedProfessional.averageRating} showValue size="md" />
-                                                <span className="text-sm text-muted-foreground">({selectedProfessional.totalReviews} avaliações)</span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full mt-2"
+                                onClick={onOpenVault}
+                            >
+                                <FileText className="w-4 h-4 mr-2" />
+                                Ir para Cofre Digital
+                            </Button>
+                        </div>
+                        <div className="flex justify-end pt-6 border-t">
+                            <Button
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={onComplete}
+                            >
+                                Concluir e Finalizar Processo
+                            </Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Profile Modal */}
+                <Dialog open={profileModalOpen} onOpenChange={setProfileModalOpen}>
+                    <DialogContent className="max-w-3xl max-h-[85vh]">
+                        {selectedProfessional && (
+                            <>
+                                <DialogHeader>
+                                    <DialogTitle className="sr-only">Perfil do Profissional</DialogTitle>
+                                </DialogHeader>
+                                <ScrollArea className="h-[calc(85vh-80px)] pr-4">
+                                    <div className="space-y-6">
+                                        <div className="flex flex-col sm:flex-row gap-4">
+                                            <Avatar className="w-20 h-20 border-4 border-accent/20">
+                                                <AvatarImage src={selectedProfessional.avatar_url || undefined} />
+                                                <AvatarFallback className="text-2xl bg-accent/10 text-accent">
+                                                    {selectedProfessional.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1">
+                                                <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                    <Badge variant="outline" className="bg-accent/10 text-accent border-accent/20">Profissional Independente</Badge>
+                                                    {selectedProfessional.is_verified && (
+                                                        <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
+                                                            <Shield className="w-3 h-3 mr-1" />Verificado
+                                                        </Badge>
+                                                    )}
+                                                </div>
+                                                <h2 className="text-2xl font-bold mb-2">{selectedProfessional.name}</h2>
+                                                <div className="flex flex-wrap items-center gap-3 text-muted-foreground mb-3">
+                                                    <span className="flex items-center gap-1"><Briefcase className="w-4 h-4" />{categoryLabels[selectedProfessional.category as ServiceCategory]}</span>
+                                                    <span>•</span>
+                                                    <span>{selectedProfessional.service_type}</span>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <StarRating rating={selectedProfessional.averageRating} showValue size="md" />
+                                                    <span className="text-sm text-muted-foreground">({selectedProfessional.totalReviews} avaliações)</span>
+                                                </div>
                                             </div>
                                         </div>
+                                        <Separator />
+                                        <div>
+                                            <h3 className="font-semibold mb-3">Sobre</h3>
+                                            <p className="text-muted-foreground whitespace-pre-line text-sm">{selectedProfessional.bio || "Sem descrição disponível."}</p>
+                                        </div>
+                                        <Separator />
+                                        <div className="grid sm:grid-cols-2 gap-4">
+                                            {selectedProfessional.email && (
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center"><Mail className="w-4 h-4 text-accent" /></div>
+                                                    <div><p className="text-xs text-muted-foreground">Email</p><a href={`mailto:${selectedProfessional.email}`} className="text-sm hover:text-accent transition-colors">{selectedProfessional.email}</a></div>
+                                                </div>
+                                            )}
+                                            {selectedProfessional.phone && (
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center"><Phone className="w-4 h-4 text-accent" /></div>
+                                                    <div><p className="text-xs text-muted-foreground">Telefone</p><a href={`tel:${selectedProfessional.phone}`} className="text-sm hover:text-accent transition-colors">{selectedProfessional.phone}</a></div>
+                                                </div>
+                                            )}
+                                            {!selectedProfessional.email && !selectedProfessional.phone && (
+                                                <p className="text-sm text-muted-foreground col-span-2">Contacte via mensagem do Imoponto.</p>
+                                            )}
+                                        </div>
+                                        <Separator />
+                                        <Button className="w-full" onClick={() => { setProfileModalOpen(false); handleContact(selectedProfessional); }}>
+                                            <MessageSquare className="w-4 h-4 mr-2" />Enviar Mensagem
+                                        </Button>
                                     </div>
-                                    <Separator />
-                                    <div>
-                                        <h3 className="font-semibold mb-3">Sobre</h3>
-                                        <p className="text-muted-foreground whitespace-pre-line text-sm">{selectedProfessional.bio || "Sem descrição disponível."}</p>
-                                    </div>
-                                    <Separator />
-                                    <div className="grid sm:grid-cols-2 gap-4">
-                                        {selectedProfessional.email && (
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center"><Mail className="w-4 h-4 text-accent" /></div>
-                                                <div><p className="text-xs text-muted-foreground">Email</p><a href={`mailto:${selectedProfessional.email}`} className="text-sm hover:text-accent transition-colors">{selectedProfessional.email}</a></div>
-                                            </div>
-                                        )}
-                                        {selectedProfessional.phone && (
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center"><Phone className="w-4 h-4 text-accent" /></div>
-                                                <div><p className="text-xs text-muted-foreground">Telefone</p><a href={`tel:${selectedProfessional.phone}`} className="text-sm hover:text-accent transition-colors">{selectedProfessional.phone}</a></div>
-                                            </div>
-                                        )}
-                                        {!selectedProfessional.email && !selectedProfessional.phone && (
-                                            <p className="text-sm text-muted-foreground col-span-2">Contacte via mensagem do Imoponto.</p>
-                                        )}
-                                    </div>
-                                    <Separator />
-                                    <Button className="w-full" onClick={() => { setProfileModalOpen(false); handleContact(selectedProfessional); }}>
-                                        <MessageSquare className="w-4 h-4 mr-2" />Enviar Mensagem
-                                    </Button>
-                                </div>
-                            </ScrollArea>
-                        </>
-                    )}
-                </DialogContent>
-            </Dialog>
+                                </ScrollArea>
+                            </>
+                        )}
+                    </DialogContent>
+                </Dialog>
 
-            {/* Contact Dialog */}
-            {selectedProfessional && (
-                <ContactDialog
-                    open={contactDialogOpen}
-                    onOpenChange={setContactDialogOpen}
-                    professional={selectedProfessional}
-                />
-            )}
+                {/* Contact Dialog */}
+                {selectedProfessional && (
+                    <ContactDialog
+                        open={contactDialogOpen}
+                        onOpenChange={setContactDialogOpen}
+                        professional={selectedProfessional}
+                    />
+                )}
+            </div>
+
+            <QuickCheckoutDialog
+                open={checkoutOpen}
+                onOpenChange={setCheckoutOpen}
+                productKey="vault_vital"
+                propertyId={propertyId}
+                onSuccess={() => {
+                    toast({
+                        title: "Arquivo Vitalício Ativado!",
+                        description: "Os seus documentos estão agora protegidos permanentemente.",
+                    });
+                }}
+            />
         </div>
     );
 }
