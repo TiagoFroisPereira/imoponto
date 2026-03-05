@@ -14,6 +14,14 @@ export interface VaultDocument {
 
 export type DocumentStatus = 'not_uploaded' | 'pending' | 'validated' | 'rejected';
 
+export type VaultState =
+  | 'EMPTY'
+  | 'FREE_ACTIVE'
+  | 'LIMIT_REACHED'
+  | 'UPGRADING'
+  | 'PREMIUM'
+  | 'LOCKED';
+
 // Required document categories for complete documentation (excluding 'outros')
 export const REQUIRED_CATEGORIES = DOCUMENT_CATEGORIES.filter(c => c.value !== 'outros').map(c => c.value);
 

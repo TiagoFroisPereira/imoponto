@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { DOCUMENT_CATEGORIES, DOCUMENT_INFO } from "@/data/documentCategories";
 import { DocumentGuideModal } from "../wizard/DocumentGuideModal";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
@@ -14,6 +15,8 @@ import { VaultOthersSection } from "./VaultOthersSection";
 import { VaultValidationDialog, VaultPreviewDialog } from "./VaultDialogs";
 import { STEP_BY_STEP_DOCUMENTS } from "./vaultUtils";
 import { AddProfessionalDialog } from "../AddProfessionalDialog";
+import { Progress } from "@/components/ui/progress";
+import { ShieldCheck, Lock, Unlock, AlertTriangle, Loader2 } from "lucide-react";
 import { VaultSharedUsers } from "./VaultSharedUsers";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -33,6 +36,7 @@ export function PropertyVault({ propertyId, propertyTitle }: PropertyVaultProps)
   const { hasFeature, loading: limitsLoading } = usePlanLimits(propertyId);
   const { hasConsent, isLoading: consentLoading } = useVaultConsent(propertyId);
   const vm = useVaultManager(propertyId, propertyTitle);
+  const vaultState = vm.vaultState;
   const [addProfessionalOpen, setAddProfessionalOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const { user } = useAuth();
@@ -70,9 +74,9 @@ export function PropertyVault({ propertyId, propertyTitle }: PropertyVaultProps)
   const isOwner = !!user && !!property && user.id === property.user_id;
 
   const isAnyLoading = vm.isLoading || limitsLoading || consentLoading || buyerAccessLoading;
-  const showPaywall = !limitsLoading && !buyerAccessLoading && !hasFeature('vault') && !hasBuyerPaidAccess;
+  const showPaywall = !vm.limitsLoading && !buyerAccessLoading && !vm.hasPremium && !hasBuyerPaidAccess;
   // Buyers with paid access already accepted terms during payment, skip consent
-  const needsConsent = !consentLoading && (hasFeature('vault') || hasBuyerPaidAccess) && !hasConsent && !hasBuyerPaidAccess;
+  const needsConsent = !consentLoading && (vm.hasPremium || hasBuyerPaidAccess) && !hasConsent && !hasBuyerPaidAccess;
   const navigate = useNavigate();
 
   const otherCategory = DOCUMENT_CATEGORIES.find(c => c.value === 'outros')!;
@@ -109,107 +113,170 @@ export function PropertyVault({ propertyId, propertyTitle }: PropertyVaultProps)
 
         {/* Main content */}
         {!isAnyLoading && (
-          <div className={`p-6 space-y-6 transition-all duration-700 ${showPaywall || needsConsent ? "blur-md pointer-events-none opacity-40 select-none scale-[0.98]" : "opacity-100 scale-100"}`}>
-            {isOwner && WIZARD_STEPS[0].upsell && (
-              <UpsellCard
-                title={vm.documents.length >= 4 ? "⚠️ Limite atingido no Cofre Básico" : WIZARD_STEPS[0].upsell.title}
-                description={vm.documents.length >= 4
-                  ? "Atingiu o limite de 4 ficheiros do modo básico. Ative o Cofre Premium para validar documentos ilimitados e garantir a segurança da venda."
-                  : WIZARD_STEPS[0].upsell.description}
-                price={WIZARD_STEPS[0].upsell.price}
-                buttonLabel={WIZARD_STEPS[0].upsell.buttonLabel}
-                secondaryButtonLabel={vm.documents.length >= 4 ? undefined : WIZARD_STEPS[0].upsell.secondaryButtonLabel}
-                variant={vm.documents.length >= 4 ? "accent" : WIZARD_STEPS[0].upsell.variant}
-                badge={vm.documents.length >= 4 ? "Urgente" : WIZARD_STEPS[0].upsell.badge}
-                onClick={() => setCheckoutOpen(true)}
-                onSecondaryClick={() => {
-                  if (property?.location) {
-                    navigate(`/pesquisa?category=fotografo&location=${encodeURIComponent(property.location)}`);
-                  } else {
-                    navigate('/pesquisa?category=fotografo');
-                  }
-                }}
-                className={cn("mb-2", vm.documents.length >= 4 && "border-amber-300 bg-amber-50/30")}
-              />
+          <div className="relative">
+            {vaultState === 'UPGRADING' && (
+              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm rounded-xl">
+                <Loader2 className="w-10 h-10 animate-spin text-primary mb-4" />
+                <p className="text-lg font-semibold tracking-tight">Processando...</p>
+                <p className="text-sm text-muted-foreground italic">A ativar o seu Cofre Premium</p>
+              </div>
             )}
-            <VaultHeader
-              documentsCount={vm.documents.length}
-              onDownloadAll={vm.handleDownloadAll}
-              downloadingAll={vm.downloadingAll}
-              onAddProfessional={() => setAddProfessionalOpen(true)}
-            />
 
-            <VaultSharedUsers propertyId={propertyId} isOwner={isOwner} />
+            <div className={`p-6 space-y-6 transition-all duration-700 ${showPaywall || needsConsent ? "blur-md pointer-events-none opacity-40 select-none scale-[0.98]" : "opacity-100 scale-100"}`}>
+              {isOwner && WIZARD_STEPS[0].upsell && (
+                <UpsellCard
+                  title={vaultState === 'LIMIT_REACHED' ? "⚠️ Limite atingido no Cofre Básico" : WIZARD_STEPS[0].upsell.title}
+                  description={vaultState === 'LIMIT_REACHED'
+                    ? "Atingiu o limite de 4 ficheiros do modo básico. Ative o Cofre Premium para validar documentos ilimitados e garantir a segurança da venda."
+                    : WIZARD_STEPS[0].upsell.description}
+                  price={WIZARD_STEPS[0].upsell.price}
+                  buttonLabel={WIZARD_STEPS[0].upsell.buttonLabel}
+                  secondaryButtonLabel={vaultState === 'LIMIT_REACHED' ? undefined : WIZARD_STEPS[0].upsell.secondaryButtonLabel}
+                  variant={vaultState === 'LIMIT_REACHED' ? "accent" : WIZARD_STEPS[0].upsell.variant}
+                  badge={vaultState === 'LIMIT_REACHED' ? "Urgente" : WIZARD_STEPS[0].upsell.badge}
+                  onClick={() => {
+                    vm.setIsUpgrading(true);
+                    setCheckoutOpen(true);
+                  }}
+                  onSecondaryClick={() => {
+                    if (property?.location) {
+                      navigate(`/pesquisa?category=fotografo&location=${encodeURIComponent(property.location)}`);
+                    } else {
+                      navigate('/pesquisa?category=fotografo');
+                    }
+                  }}
+                  className={cn("mb-2", vaultState === 'LIMIT_REACHED' && "border-amber-300 bg-amber-50/30")}
+                />
+              )}
 
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-sm font-medium text-foreground">Documentos Necessários</h4>
-                <span className="text-xs text-muted-foreground">
-                  {vm.documents.filter(d => d.category !== 'outros').length} de {DOCUMENT_CATEGORIES.length - 1} carregados
-                </span>
-              </div>
+              {/* State Feedback Banner */}
+              {vaultState === 'EMPTY' && (
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Unlock className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Comece a organizar a sua venda.</p>
+                    <p className="text-xs text-muted-foreground">O primeiro documento é o passo mais importante para uma escritura rápida.</p>
+                  </div>
+                </div>
+              )}
 
-              {/* Step-by-step documents */}
-              <div className="space-y-3">
-                {DOCUMENT_CATEGORIES.filter(cat => STEP_BY_STEP_DOCUMENTS.includes(cat.value)).map((category) => (
-                  <VaultDocumentCard
-                    key={category.value}
-                    category={category}
-                    doc={vm.getDocumentByCategory(category.value)}
-                    isStepByStep={true}
-                    uploading={vm.uploading}
-                    uploadingCategory={vm.uploadingCategory}
-                    onUpload={vm.handleUploadButtonClick}
-                    onPreview={vm.openPreviewDialog}
-                    onDownload={vm.handleDownloadDocument}
-                    onDelete={(doc) => vm.deleteMutation.mutate(doc)}
-                    onToggleVisibility={(p) => vm.toggleVisibilityMutation.mutate(p)}
-                    onGuide={vm.openGuideDialog}
-                    onValidate={vm.openValidationDialog}
-                  />
-                ))}
-              </div>
+              {vaultState === 'FREE_ACTIVE' && (
+                <div className="bg-muted/50 border rounded-lg p-4 space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium">{vm.documents.length}/4 espaços grátis usados</span>
+                    <span className="text-muted-foreground">{4 - vm.documents.length} restantes</span>
+                  </div>
+                  <Progress value={(vm.documents.length / 4) * 100} className="h-2" />
+                </div>
+              )}
 
-              {/* Accordion documents */}
-              <Accordion type="multiple" className="space-y-3">
-                {DOCUMENT_CATEGORIES.filter(cat => !STEP_BY_STEP_DOCUMENTS.includes(cat.value) && cat.value !== 'outros').map((category) => (
-                  <VaultDocumentCard
-                    key={category.value}
-                    category={category}
-                    doc={vm.getDocumentByCategory(category.value)}
-                    isStepByStep={false}
-                    uploading={vm.uploading}
-                    uploadingCategory={vm.uploadingCategory}
-                    info={DOCUMENT_INFO[category.value]}
-                    onUpload={vm.handleUploadButtonClick}
-                    onPreview={vm.openPreviewDialog}
-                    onDownload={vm.handleDownloadDocument}
-                    onDelete={(doc) => vm.deleteMutation.mutate(doc)}
-                    onToggleVisibility={(p) => vm.toggleVisibilityMutation.mutate(p)}
-                    onGuide={vm.openGuideDialog}
-                    onValidate={vm.openValidationDialog}
-                  />
-                ))}
-              </Accordion>
+              {vaultState === 'LOCKED' && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-6 h-6 text-amber-500" />
+                    <div>
+                      <p className="font-bold text-sm text-amber-900">O seu cofre expirou.</p>
+                      <p className="text-xs text-amber-800">Ative o modo Vitalício por €10/ano para manter os seus documentos seguros.</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="bg-amber-600 hover:bg-amber-700 w-full sm:w-auto"
+                    onClick={() => setCheckoutOpen(true)}
+                  >
+                    Ativar Modo Vitalício
+                  </Button>
+                </div>
+              )}
 
-              {/* Others section */}
-              <VaultOthersSection
-                otherDocs={otherDocs}
-                categoryLabel={otherCategory.label}
-                uploading={vm.uploading}
-                uploadingCategory={vm.uploadingCategory}
-                onUpload={vm.handleUploadButtonClick}
-                onPreview={vm.openPreviewDialog}
-                onDownload={vm.handleDownloadDocument}
-                onDelete={(doc) => vm.deleteMutation.mutate(doc)}
-                onToggleVisibility={(p) => vm.toggleVisibilityMutation.mutate(p)}
-                onValidate={vm.openValidationDialog}
+              <VaultHeader
+                documentsCount={vm.documents.length}
+                onDownloadAll={vm.handleDownloadAll}
+                downloadingAll={vm.downloadingAll}
+                onAddProfessional={() => setAddProfessionalOpen(true)}
+                vaultState={vaultState}
               />
-            </div>
 
-            <p className="text-xs text-muted-foreground pt-4">
-              💡 Documentos públicos ficam visíveis na página do anúncio. Documentos privados só você pode ver.
-            </p>
+              <VaultSharedUsers propertyId={propertyId} isOwner={isOwner} />
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-foreground">Documentos Necessários</h4>
+                  <span className="text-xs text-muted-foreground">
+                    {vm.documents.filter(d => d.category !== 'outros').length} de {DOCUMENT_CATEGORIES.length - 1} carregados
+                  </span>
+                </div>
+
+                {/* Step-by-step documents */}
+                <div className="space-y-3">
+                  {DOCUMENT_CATEGORIES.filter(cat => STEP_BY_STEP_DOCUMENTS.includes(cat.value)).map((category) => (
+                    <VaultDocumentCard
+                      key={category.value}
+                      category={category}
+                      doc={vm.getDocumentByCategory(category.value)}
+                      isStepByStep={true}
+                      uploading={vm.uploading}
+                      uploadingCategory={vm.uploadingCategory}
+                      onUpload={vm.handleUploadButtonClick}
+                      onPreview={vm.openPreviewDialog}
+                      onDownload={vm.handleDownloadDocument}
+                      onDelete={(doc) => vm.deleteMutation.mutate(doc)}
+                      onToggleVisibility={(p) => vm.toggleVisibilityMutation.mutate(p)}
+                      onGuide={vm.openGuideDialog}
+                      onValidate={vm.openValidationDialog}
+                      disabled={vm.vaultState === 'LIMIT_REACHED' || vm.vaultState === 'LOCKED'}
+                      isLocked={vm.vaultState === 'LOCKED'}
+                    />
+                  ))}
+                </div>
+
+                {/* Accordion documents */}
+                <Accordion type="multiple" className="space-y-3">
+                  {DOCUMENT_CATEGORIES.filter(cat => !STEP_BY_STEP_DOCUMENTS.includes(cat.value) && cat.value !== 'outros').map((category) => (
+                    <VaultDocumentCard
+                      key={category.value}
+                      category={category}
+                      doc={vm.getDocumentByCategory(category.value)}
+                      isStepByStep={false}
+                      uploading={vm.uploading}
+                      uploadingCategory={vm.uploadingCategory}
+                      info={DOCUMENT_INFO[category.value]}
+                      onUpload={vm.handleUploadButtonClick}
+                      onPreview={vm.openPreviewDialog}
+                      onDownload={vm.handleDownloadDocument}
+                      onDelete={(doc) => vm.deleteMutation.mutate(doc)}
+                      onToggleVisibility={(p) => vm.toggleVisibilityMutation.mutate(p)}
+                      onGuide={vm.openGuideDialog}
+                      onValidate={vm.openValidationDialog}
+                      disabled={vm.vaultState === 'LIMIT_REACHED' || vm.vaultState === 'LOCKED'}
+                      isLocked={vm.vaultState === 'LOCKED'}
+                    />
+                  ))}
+                </Accordion>
+
+                {/* Others section */}
+                <VaultOthersSection
+                  otherDocs={otherDocs}
+                  categoryLabel={otherCategory.label}
+                  uploading={vm.uploading}
+                  uploadingCategory={vm.uploadingCategory}
+                  onUpload={vm.handleUploadButtonClick}
+                  onPreview={vm.openPreviewDialog}
+                  onDownload={vm.handleDownloadDocument}
+                  onDelete={(doc) => vm.deleteMutation.mutate(doc)}
+                  onToggleVisibility={(p) => vm.toggleVisibilityMutation.mutate(p)}
+                  onValidate={vm.openValidationDialog}
+                  disabled={vaultState === 'LIMIT_REACHED' || vaultState === 'LOCKED'}
+                  isLocked={vaultState === 'LOCKED'}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground pt-4">
+                💡 Documentos públicos ficam visíveis na página do anúncio. Documentos privados só você pode ver.
+              </p>
+            </div>
           </div>
         )}
 
@@ -269,9 +336,12 @@ export function PropertyVault({ propertyId, propertyTitle }: PropertyVaultProps)
         onOpenChange={setCheckoutOpen}
         productKey="vault_premium"
         propertyId={propertyId}
-        onSuccess={() => refetchProperty()}
+        onSuccess={() => {
+          vm.setIsUpgrading(false);
+          refetchProperty();
+        }}
       />
-    </div>
+    </div >
   );
 }
 

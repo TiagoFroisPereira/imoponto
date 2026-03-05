@@ -13,7 +13,7 @@ import { LocationPriceInfo } from "@/components/property/LocationPriceInfo";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, MapPin, Loader2, Shield, Heart, Share2, Facebook, Instagram, Link as LinkIcon, MessageCircle } from "lucide-react";
+import { ArrowLeft, MapPin, Loader2, Shield, Heart, Share2, Facebook, Instagram, Link as LinkIcon, MessageCircle, Lock } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -29,6 +29,7 @@ import { PropertyStatsCard } from "@/components/property/details/PropertyStatsCa
 import { PropertyDialogs } from "@/components/property/details/PropertyDialogs";
 import { RequestBuyerAccessDialog } from "@/components/property/RequestBuyerAccessDialog";
 import { PropertyVault } from "@/components/property/vault/PropertyVault";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 interface PropertyDocument {
   id: string;
   name: string;
@@ -73,6 +74,9 @@ export default function PropertyDetail() {
       }
     });
   }, [property]);
+
+  const { hasFeature } = usePlanLimits(id);
+  const hasVaultPremium = hasFeature('vault');
 
   // Check if current user has paid buyer access to vault
   const { data: hasBuyerVaultAccess } = useQuery({
@@ -381,6 +385,7 @@ export default function PropertyDetail() {
                     variant="outline"
                     onClick={() => navigate(`/imovel/${id}/documentos`)}
                   >
+                    {!hasVaultPremium && <Lock className="w-4 h-4 mr-2" />}
                     Abrir Cofre Digital
                   </Button>
                 </div>

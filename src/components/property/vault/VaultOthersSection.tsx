@@ -1,4 +1,5 @@
 import { FileText, Lock, Unlock, Upload, Eye, Download, Trash2, Loader2, ShieldCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VaultDocument, getDocumentStatus, getStatusConfig } from "./vaultUtils";
@@ -14,6 +15,8 @@ interface VaultOthersSectionProps {
   onDelete: (doc: VaultDocument) => void;
   onToggleVisibility: (params: { id: string; isPublic: boolean }) => void;
   onValidate: (doc: VaultDocument) => void;
+  disabled?: boolean;
+  isLocked?: boolean;
 }
 
 export function VaultOthersSection({
@@ -27,6 +30,8 @@ export function VaultOthersSection({
   onDelete,
   onToggleVisibility,
   onValidate,
+  disabled,
+  isLocked,
 }: VaultOthersSectionProps) {
   return (
     <div className="rounded-lg border border-border/50 bg-muted/30 p-3 md:p-4">
@@ -45,9 +50,9 @@ export function VaultOthersSection({
         <Button
           variant="outline"
           size="sm"
-          className="h-9 md:h-10 px-3 md:px-4 text-xs font-medium"
+          className={cn("h-9 md:h-10 px-3 md:px-4 text-xs font-medium", disabled && "opacity-50 cursor-not-allowed")}
           onClick={() => onUpload('outros')}
-          disabled={uploading && uploadingCategory === 'outros'}
+          disabled={disabled || (uploading && uploadingCategory === 'outros')}
         >
           {uploading && uploadingCategory === 'outros' ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -100,9 +105,11 @@ export function VaultOthersSection({
                   <Button variant="ghost" size="icon" className="h-8 w-8 md:h-7 md:w-7" onClick={() => onDownload(doc)} title="Descarregar">
                     <Download className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 md:h-7 md:w-7 text-destructive" onClick={() => onDelete(doc)} title="Eliminar">
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  {!isLocked && (
+                    <Button variant="ghost" size="icon" className="h-8 w-8 md:h-7 md:w-7 text-destructive" onClick={() => onDelete(doc)} title="Eliminar">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             );

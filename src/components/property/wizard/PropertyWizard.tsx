@@ -30,6 +30,7 @@ import { PostEscrituraManager } from "./PostEscrituraManager";
 import { ListingProposalsManager } from "./ListingProposalsManager";
 import { DocumentStatusItem } from "./DocumentStatusItem";
 import { UpsellCard } from "./UpsellCard";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 interface PropertyWizardProps {
     propertyId: string;
@@ -80,6 +81,9 @@ export function PropertyWizard({
 
     // Use proposals hook for step validation
     const { canAdvanceWizard: canAdvanceProposals, hasAcceptedProposal } = usePropertyProposals(propertyId);
+
+    const { hasFeature } = usePlanLimits(propertyId);
+    const hasVaultPremium = hasFeature('vault');
 
     const handleFinalizeProcess = async () => {
         setLoading(true);
@@ -440,7 +444,11 @@ export function PropertyWizard({
                                     variant={currentStepData.integration.actionType === 'navigate' ? 'default' : 'outline'}
                                     onClick={() => handleIntegrationClick(currentStepData.integration)}
                                 >
-                                    <Eye className="w-4 h-4 mr-2" />
+                                    {currentStepData.integration.componentId === 'vault' && !hasVaultPremium ? (
+                                        <Lock className="w-4 h-4 mr-2" />
+                                    ) : (
+                                        <Eye className="w-4 h-4 mr-2" />
+                                    )}
                                     {currentStepData.integration.buttonLabel}
                                 </Button>
                             </div>

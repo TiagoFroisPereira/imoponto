@@ -1,4 +1,4 @@
-import { Shield, Users, Eye } from "lucide-react";
+import { Shield, Users, Eye, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DocumentationStatus,
@@ -11,6 +11,7 @@ interface PropertyVaultSectionProps {
   onRequestAccess: (documentId: string | null, documentName: string) => void;
   onRequestBuyerAccess?: () => void;
   isOwner?: boolean;
+  hasVaultPremium?: boolean;
 }
 
 export function PropertyVaultSection({
@@ -19,6 +20,7 @@ export function PropertyVaultSection({
   onRequestAccess,
   onRequestBuyerAccess,
   isOwner,
+  hasVaultPremium = false,
 }: PropertyVaultSectionProps) {
   const hasDocuments = allDocuments.length > 0;
 
@@ -61,8 +63,8 @@ export function PropertyVaultSection({
             className="w-full"
             variant="default"
           >
-            <Users className="w-4 h-4 mr-2" />
-            Adicionar Profissional ao Cofre
+            {hasVaultPremium ? <Users className="w-4 h-4 mr-2" /> : <Lock className="w-4 h-4 mr-2" />}
+            {hasVaultPremium ? "Adicionar Profissional ao Cofre" : "Abrir Cofre"}
           </Button>
         )}
 

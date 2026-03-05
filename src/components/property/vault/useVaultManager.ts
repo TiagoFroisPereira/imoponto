@@ -10,7 +10,9 @@ import {
   calculateDocumentationLevel,
   formatFileSize,
   getStoragePath,
+  VaultState,
 } from "./vaultUtils";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 
 export function useVaultManager(propertyId: string, propertyTitle?: string) {
   const { toast } = useToast();
@@ -28,7 +30,10 @@ export function useVaultManager(propertyId: string, propertyTitle?: string) {
   const [previewDocument, setPreviewDocument] = useState<VaultDocument | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [consentDialogOpen, setConsentDialogOpen] = useState(false);
+  const [isUpgrading, setIsUpgrading] = useState(false);
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  const { hasFeature, loading: limitsLoading } = usePlanLimits(propertyId);
 
   // Query
   const { data: documents = [], isLoading } = useQuery({
@@ -51,6 +56,34 @@ export function useVaultManager(propertyId: string, propertyTitle?: string) {
       return data as VaultDocument[];
     }
   });
+
+  const { data: property } = useQuery({
+    queryKey: ['property-status', propertyId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('properties')
+        .select('status')
+        .eq('id', propertyId)
+        .single();
+      return data;
+    },
+  });
+
+  // Calculate State
+  const getVaultState = (): VaultState => {
+    if (isUpgrading) return 'UPGRADING';
+    if (hasFeature('vault')) return 'PREMIUM';
+
+    const isSold = property?.status === 'sold' || property?.status === 'completed';
+    if (isSold && !hasFeature('vault')) return 'LOCKED';
+
+    const count = documents.length;
+    if (count === 0) return 'EMPTY';
+    if (count >= 4) return 'LIMIT_REACHED';
+    return 'FREE_ACTIVE';
+  };
+
+  const vaultState = getVaultState();
 
   // Mutations
   const toggleVisibilityMutation = useMutation({
@@ -361,7 +394,12 @@ export function useVaultManager(propertyId: string, propertyTitle?: string) {
     previewUrl,
     consentDialogOpen,
     setConsentDialogOpen,
+    isUpgrading,
+    setIsUpgrading,
     fileInputRefs,
+    vaultState,
+    hasPremium: hasFeature('vault'),
+    limitsLoading,
     // Mutations
     toggleVisibilityMutation,
     deleteMutation,

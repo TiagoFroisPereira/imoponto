@@ -5,6 +5,7 @@ import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/
 import { ExternalLink } from "lucide-react";
 import { VaultDocument, getDocumentStatus, getStatusConfig } from "./vaultUtils";
 import { DocumentInfo } from "@/data/documentCategories";
+import { cn } from "@/lib/utils";
 
 const STATUS_ICON_MAP = {
   AlertCircle,
@@ -27,6 +28,8 @@ interface VaultDocumentCardProps {
   onToggleVisibility: (params: { id: string; isPublic: boolean }) => void;
   onGuide: (category: string) => void;
   onValidate: (doc: VaultDocument) => void;
+  disabled?: boolean;
+  isLocked?: boolean;
 }
 
 export function VaultDocumentCard({
@@ -43,6 +46,8 @@ export function VaultDocumentCard({
   onToggleVisibility,
   onGuide,
   onValidate,
+  disabled,
+  isLocked,
 }: VaultDocumentCardProps) {
   const status = getDocumentStatus(doc);
   const statusConfig = getStatusConfig(status);
@@ -82,10 +87,16 @@ export function VaultDocumentCard({
                 </Badge>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onPreview(doc)}><Eye className="w-4 h-4" /></Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onDownload(doc)}><Download className="w-4 h-4" /></Button>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(doc)}><Trash2 className="w-4 h-4" /></Button>
+                {!isLocked && <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => onDelete(doc)}><Trash2 className="w-4 h-4" /></Button>}
               </>
             ) : (
-              <Button variant="outline" size="sm" onClick={() => onUpload(category.value)} disabled={uploading && uploadingCategory === category.value}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onUpload(category.value)}
+                disabled={disabled || (uploading && uploadingCategory === category.value)}
+                className={cn(disabled && "opacity-50 cursor-not-allowed")}
+              >
                 {uploading && uploadingCategory === category.value ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Upload className="w-4 h-4 mr-1.5" />Upload</>}
               </Button>
             )}
@@ -118,7 +129,13 @@ export function VaultDocumentCard({
               <Info className="w-4 h-4 mr-2" />Como obter
             </Button>
             {!doc ? (
-              <Button variant="default" size="sm" className="h-10 text-xs font-semibold" onClick={() => onUpload(category.value)} disabled={uploading && uploadingCategory === category.value}>
+              <Button
+                variant="default"
+                size="sm"
+                className="h-10 text-xs font-semibold"
+                onClick={() => onUpload(category.value)}
+                disabled={disabled || (uploading && uploadingCategory === category.value)}
+              >
                 {uploading && uploadingCategory === category.value ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
                 Inserir Doc
               </Button>
@@ -216,7 +233,13 @@ export function VaultDocumentCard({
 
         <div className="grid grid-cols-1 gap-2">
           {!doc ? (
-            <Button variant="default" size="sm" className="h-10 text-xs font-semibold" onClick={() => onUpload(category.value)} disabled={uploading && uploadingCategory === category.value}>
+            <Button
+              variant="default"
+              size="sm"
+              className="h-10 text-xs font-semibold"
+              onClick={() => onUpload(category.value)}
+              disabled={disabled || (uploading && uploadingCategory === category.value)}
+            >
               {uploading && uploadingCategory === category.value ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Upload className="w-4 h-4 mr-2" />}
               Inserir Doc
             </Button>
